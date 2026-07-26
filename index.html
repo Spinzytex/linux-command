@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cd . — Linux Navigation Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #070b14;
+    --panel: #0e1524;
+    --panel-raised: #131c30;
+    --line: #1e2a42;
+    --text: #d7e2f7;
+    --dim: #7c8aa5;
+    --dimmer: #4d5972;
+    --neon-mint: #2bffa8;
+    --neon-cyan: #4ee1ff;
+    --neon-amber: #ffb84d;
+    --error: #ff5d7a;
+    --dir-color: #6fb8ff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(78,225,255,0.06), transparent),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(43,255,168,0.05), transparent),
+      var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  header{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap:20px; flex-wrap:wrap; margin-bottom:22px;
+    border-bottom:1px solid var(--line); padding-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:9px;
+    background:linear-gradient(135deg, rgba(43,255,168,0.15), rgba(78,225,255,0.1));
+    border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--neon-mint);
+    font-size:18px;
+  }
+  h1{font-size:22px;margin:0;font-weight:600;letter-spacing:0.2px;}
+  h1 span{color:var(--neon-mint);}
+  .tagline{color:var(--dim); font-size:13px; margin-top:3px; font-family:'JetBrains Mono',monospace;}
+
+  .progress-track{display:flex; gap:8px; align-items:center;}
+  .dot{
+    width:34px; height:6px; border-radius:4px; background:var(--line);
+    transition:background .3s ease;
+    position:relative;
+  }
+  .dot.done{background:var(--neon-mint);}
+  .dot.active{background:var(--neon-cyan);}
+  .progress-label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); margin-left:6px;}
+
+  #score-badge{
+    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;
+    color:var(--neon-mint); background:rgba(43,255,168,0.08);
+    border:1px solid rgba(43,255,168,0.3); border-radius:7px;
+    padding:5px 11px; margin-top:8px; display:inline-block;
+    transition:transform .15s ease;
+  }
+  #score-badge.bump{transform:scale(1.08);}
+
+  .points-chip{
+    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
+    color:#04120c; background:var(--neon-mint);
+    border-radius:5px; padding:2px 7px; margin-left:8px;
+  }
+
+  #scorecard{
+    margin-top:14px; border:1px solid var(--line); border-radius:9px;
+    overflow:hidden; display:none;
+  }
+  .sc-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 13px; font-size:13px; border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;
+  }
+  .sc-row:last-child{border-bottom:none;}
+  .sc-row.total{background:var(--panel-raised); font-weight:700; color:var(--neon-mint);}
+  .sc-cmd{color:var(--text); font-weight:600;}
+  .sc-meta{color:var(--dimmer); font-size:11px; margin-left:8px;}
+  .sc-pts{color:var(--neon-mint); font-weight:700;}
+  #retry-btn{
+    margin-top:12px; background:none; border:1px solid var(--dimmer); color:var(--dim);
+    padding:8px 16px; border-radius:7px; cursor:pointer;
+    font-family:'Space Grotesk',sans-serif; font-size:13px;
+  }
+  #retry-btn:hover{border-color:var(--neon-cyan); color:var(--neon-cyan);}
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.05fr 1fr 0.78fr;
+    gap:18px;
+    align-items:start;
+  }
+  @media (max-width: 980px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+  }
+  .panel h2{
+    font-size:11px; text-transform:uppercase; letter-spacing:1.4px;
+    color:var(--dim); margin:0 0 14px; font-weight:600;
+  }
+
+  /* LESSON PANEL */
+  #lesson-cmd{
+    font-family:'JetBrains Mono',monospace;
+    font-size:20px; font-weight:600; color:var(--neon-mint);
+    background:var(--panel-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 14px;
+    margin-bottom:14px;
+    display:inline-block;
+  }
+  #lesson-title{font-size:17px; font-weight:600; margin:0 0 8px;}
+  #lesson-desc{color:var(--dim); font-size:14.5px; line-height:1.55; margin-bottom:16px;}
+  #lesson-desc b{color:var(--text); font-weight:600;}
+  .why-box{
+    border-left:2px solid var(--neon-cyan);
+    padding:10px 14px;
+    background:rgba(78,225,255,0.05);
+    border-radius:0 8px 8px 0;
+    font-size:13px; color:var(--dim); line-height:1.5;
+    margin-bottom:16px;
+  }
+  .why-box b{color:var(--neon-cyan); font-weight:600;}
+  #hint-btn{
+    background:none; border:1px dashed var(--dimmer); color:var(--dim);
+    font-family:'JetBrains Mono',monospace; font-size:12px;
+    padding:7px 12px; border-radius:6px; cursor:pointer;
+  }
+  #hint-btn:hover{border-color:var(--neon-amber); color:var(--neon-amber);}
+  #hint-text{
+    display:none; margin-top:10px; font-size:13px; color:var(--neon-amber);
+    font-family:'JetBrains Mono',monospace;
+  }
+  #lesson-complete-banner{
+    display:none; margin-top:16px; background:rgba(43,255,168,0.08);
+    border:1px solid rgba(43,255,168,0.35); border-radius:8px;
+    padding:12px 14px; font-size:13.5px; color:var(--neon-mint);
+  }
+  #next-btn{
+    margin-top:12px; background:var(--neon-mint); color:#04120c;
+    border:none; font-weight:700; padding:9px 18px; border-radius:7px;
+    cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:13.5px;
+  }
+  #next-btn:hover{filter:brightness(1.08);}
+
+  /* TERMINAL PANEL */
+  .term-panel{padding:0; overflow:hidden;}
+  .term-titlebar{
+    background:var(--panel-raised); padding:10px 14px;
+    display:flex; align-items:center; gap:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .term-dot{width:10px;height:10px;border-radius:50%;}
+  .term-dot.r{background:#ff5f57;} .term-dot.y{background:#febc2e;} .term-dot.g{background:#28c840;}
+  .term-titlebar span{
+    margin-left:8px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dim);
+  }
+  #terminal{
+    font-family:'JetBrains Mono',monospace; font-size:13.5px; line-height:1.6;
+    padding:16px; height:420px; overflow-y:auto; color:var(--text);
+    cursor:text;
+  }
+  #terminal::-webkit-scrollbar{width:8px;}
+  #terminal::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+  .line{white-space:pre-wrap; word-break:break-word;}
+  .prompt-line{display:flex; flex-wrap:wrap;}
+  .prompt-user{color:var(--neon-mint);}
+  .prompt-path{color:var(--neon-cyan);}
+  .prompt-sep{color:var(--dim);}
+  .out-dir{color:var(--dir-color); font-weight:600;}
+  .out-hidden{color:var(--neon-amber);}
+  .out-error{color:var(--error);}
+  .out-system{color:var(--dim); font-style:italic;}
+  .out-success{color:var(--neon-mint);}
+  #input-row{display:flex; align-items:center;}
+  #cmd-input{
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13.5px;
+    caret-color:var(--neon-mint);
+  }
+  .cursor-blink{
+    display:inline-block; width:7px; height:15px; background:var(--neon-mint);
+    animation:blink 1s step-end infinite; margin-left:2px; vertical-align:middle;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  /* MAP PANEL */
+  #tree{font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.9;}
+  .tree-line{white-space:nowrap; padding:2px 6px; border-radius:5px; transition:background .2s;}
+  .tree-line.current{background:rgba(43,255,168,0.1); color:var(--neon-mint); font-weight:600;}
+  .tree-line .tglyph{color:var(--dimmer);}
+  .tree-line.is-dir{color:var(--dir-color);}
+  .tree-line.is-hidden{color:var(--neon-amber); opacity:0.85;}
+  .tree-line.is-file{color:var(--dim);}
+  #legend{margin-top:16px; font-size:11.5px; color:var(--dimmer); display:flex; flex-direction:column; gap:6px;}
+  #legend div{display:flex; align-items:center; gap:7px;}
+  .swatch{width:9px;height:9px;border-radius:2px;}
+
+  footer{
+    margin-top:26px; text-align:center; color:var(--dimmer);
+    font-size:12px; font-family:'JetBrains Mono',monospace;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">~$</div>
+      <div>
+        <h1>cd <span>.</span> — Linux Navigation Trainer</h1>
+        <div class="tagline">pwd · ls · ls -a · cd · cd .. — learn by actually typing them</div>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div class="progress-track" id="progress-track"></div>
+      <div class="progress-label" id="progress-label">Lesson 1 of 5</div>
+      <div id="score-badge">Score: 0 / 100</div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LESSON PANEL -->
+    <div class="panel" id="lesson-panel">
+      <h2>Current lesson</h2>
+      <div id="lesson-cmd">pwd</div>
+      <div id="lesson-title">Where am I?</div>
+      <div id="lesson-desc"></div>
+      <div class="why-box" id="lesson-why"></div>
+      <button id="hint-btn">Show a hint</button>
+      <div id="hint-text"></div>
+      <div id="lesson-complete-banner"></div>
+      <div><button id="next-btn" style="display:none;">Next command →</button></div>
+      <div id="scorecard"></div>
+      <div><button id="retry-btn" style="display:none;">Reset & retry for full marks</button></div>
+    </div>
+
+    <!-- TERMINAL PANEL -->
+    <div class="panel term-panel">
+      <div class="term-titlebar">
+        <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
+        <span>student@practice-box: bash</span>
+      </div>
+      <div id="terminal" tabindex="0"></div>
+      <div style="padding:0 16px 14px;">
+        <div id="input-row">
+          <span class="prompt-line" id="live-prompt"></span>
+          <input id="cmd-input" autocomplete="off" spellcheck="false" autofocus />
+          <span class="cursor-blink"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP PANEL -->
+    <div class="panel">
+      <h2>Filesystem map</h2>
+      <div id="tree"></div>
+      <div id="legend">
+        <div><span class="swatch" style="background:var(--dir-color)"></span> folder</div>
+        <div><span class="swatch" style="background:var(--dim)"></span> regular file</div>
+        <div><span class="swatch" style="background:var(--neon-amber)"></span> hidden (dotfile)</div>
+        <div><span class="swatch" style="background:var(--neon-mint)"></span> you are here</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>Type commands directly into the terminal — Enter to run, ↑ / ↓ to recall history, "clear" to wipe the screen, "help" any time.</footer>
+</div>
+
+<script>
+/* ---------------- Virtual filesystem ---------------- */
+const fs = {
+  name: "student", type: "dir", hidden:false,
+  children: {
+    "documents": { name:"documents", type:"dir", hidden:false, children:{
+      "notes.txt": {name:"notes.txt", type:"file", hidden:false, children:{}},
+      "todo.md": {name:"todo.md", type:"file", hidden:false, children:{}},
+      ".draft.txt": {name:".draft.txt", type:"file", hidden:true, children:{}}
+    }},
+    "projects": { name:"projects", type:"dir", hidden:false, children:{
+      "cyberlab": { name:"cyberlab", type:"dir", hidden:false, children:{
+        "readme.md": {name:"readme.md", type:"file", hidden:false, children:{}}
+      }},
+      "readme.md": {name:"readme.md", type:"file", hidden:false, children:{}}
+    }},
+    "photos": { name:"photos", type:"dir", hidden:false, children:{
+      "vacation.jpg": {name:"vacation.jpg", type:"file", hidden:false, children:{}}
+    }},
+    ".bashrc": {name:".bashrc", type:"file", hidden:true, children:{}},
+    ".config": { name:".config", type:"dir", hidden:true, children:{
+      "settings.conf": {name:"settings.conf", type:"file", hidden:false, children:{}}
+    }}
+  }
+};
+
+let cwdPath = ["student"]; // path segments from root
+
+function resolveNode(path){
+  let node = fs;
+  for(let i=1;i<path.length;i++){
+    node = node.children[path[i]];
+    if(!node) return null;
+  }
+  return node;
+}
+
+function promptPathString(){
+  // show ~ for home
+  return "~" + (cwdPath.length>1 ? "/" + cwdPath.slice(1).join("/") : "");
+}
+
+/* ---------------- Lessons ---------------- */
+const lessons = [
+  {
+    cmd: "pwd",
+    title: "Where am I?",
+    desc: "Every terminal session starts somewhere. <b>pwd</b> stands for <b>print working directory</b> — it just prints the folder you're currently standing in.",
+    why: "<b>Why it matters:</b> before you move or touch anything, you confirm your location. Every real investigation, every deployment script, starts with knowing exactly where you are.",
+    hint: "Type <b>pwd</b> and press Enter. No arguments needed.",
+    check: (input) => input.trim() === "pwd"
+  },
+  {
+    cmd: "ls",
+    title: "What's in this folder?",
+    desc: "<b>ls</b> lists the contents of your current directory — the files and folders sitting right where you are.",
+    why: "<b>Why it matters:</b> pwd tells you where you are, ls tells you what's around you. Together they're how you orient yourself in any system.",
+    hint: "Type <b>ls</b> and press Enter.",
+    check: (input) => input.trim() === "ls"
+  },
+  {
+    cmd: "ls -a",
+    title: "The hidden files",
+    desc: "Plain <b>ls</b> skips anything starting with a dot. Add the <b>-a</b> flag (\"all\") and it shows everything, dotfiles included — like <b>.bashrc</b> and <b>.config</b>.",
+    why: "<b>Why it matters:</b> config files, credentials, and settings almost always live as dotfiles. In security work, what's hidden by default is often exactly what you need to check.",
+    hint: "Type <b>ls -a</b> — a space, then a dash, then the letter a.",
+    check: (input) => input.trim() === "ls -a" || input.trim() === "ls -la" || input.trim() === "ls -al"
+  },
+  {
+    cmd: "cd documents",
+    title: "Moving into a folder",
+    desc: "<b>cd</b> means <b>change directory</b>. Follow it with a folder name to step inside it. Try moving into the <b>documents</b> folder you can see in the map on the right.",
+    why: "<b>Why it matters:</b> this is how you actually navigate a filesystem instead of just looking at it — the core move you'll repeat thousands of times.",
+    hint: "Type <b>cd documents</b> and press Enter.",
+    check: (input) => input.trim() === "cd documents"
+  },
+  {
+    cmd: "cd ..",
+    title: "Stepping back out",
+    desc: "<b>..</b> always means \"the parent folder, one level up.\" So <b>cd ..</b> takes you back out of wherever you are.",
+    why: "<b>Why it matters:</b> you'll dig into deep folder trees constantly. cd .. is your way back, one step at a time, without needing to know the full path.",
+    hint: "Type <b>cd ..</b> — two dots, no space between them.",
+    check: (input) => input.trim() === "cd .."
+  }
+];
+
+let currentLesson = 0;
+let lessonDone = false;
+let lessonAttempts = 0;
+let lessonHintUsed = false;
+let score = 0;
+const MAX_PER_LESSON = 20;
+const MAX_SCORE = lessons.length * MAX_PER_LESSON;
+const results = []; // {cmd, points, attempts, hintUsed}
+
+const el = {
+  terminal: document.getElementById('terminal'),
+  input: document.getElementById('cmd-input'),
+  livePrompt: document.getElementById('live-prompt'),
+  lessonCmd: document.getElementById('lesson-cmd'),
+  lessonTitle: document.getElementById('lesson-title'),
+  lessonDesc: document.getElementById('lesson-desc'),
+  lessonWhy: document.getElementById('lesson-why'),
+  hintBtn: document.getElementById('hint-btn'),
+  hintText: document.getElementById('hint-text'),
+  completeBanner: document.getElementById('lesson-complete-banner'),
+  nextBtn: document.getElementById('next-btn'),
+  progressTrack: document.getElementById('progress-track'),
+  progressLabel: document.getElementById('progress-label'),
+  tree: document.getElementById('tree'),
+  scoreBadge: document.getElementById('score-badge'),
+  scorecard: document.getElementById('scorecard'),
+  retryBtn: document.getElementById('retry-btn')
+};
+
+let history = [];
+let historyPtr = -1;
+
+function renderPrompt(){
+  el.livePrompt.innerHTML =
+    '<span class="prompt-user">student@practice-box</span>' +
+    '<span class="prompt-sep">:</span>' +
+    '<span class="prompt-path">' + promptPathString() + '</span>' +
+    '<span class="prompt-sep">$&nbsp;</span>';
+}
+
+function appendLine(html, cls){
+  const div = document.createElement('div');
+  div.className = 'line' + (cls ? ' '+cls : '');
+  div.innerHTML = html;
+  el.terminal.appendChild(div);
+  el.terminal.scrollTop = el.terminal.scrollHeight;
+}
+
+function appendPromptEcho(cmdText){
+  appendLine(
+    '<span class="prompt-user">student@practice-box</span><span class="prompt-sep">:</span>' +
+    '<span class="prompt-path">' + promptPathString() + '</span>' +
+    '<span class="prompt-sep">$ </span>' + escapeHtml(cmdText)
+  );
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ---------------- Command execution ---------------- */
+function runCommand(raw){
+  const input = raw;
+  appendPromptEcho(input);
+  const trimmed = input.trim();
+
+  if(trimmed === ""){ renderTree(); return; }
+
+  if(trimmed === "clear"){
+    el.terminal.innerHTML = "";
+    checkLesson(trimmed);
+    return;
+  }
+
+  if(trimmed === "help"){
+    appendLine("Commands available in this sandbox: pwd, ls, ls -a, cd &lt;folder&gt;, cd .., cd ~, clear, help", "out-system");
+    checkLesson(trimmed);
+    return;
+  }
+
+  if(trimmed === "pwd"){
+    const abs = cwdPath.length === 1 ? "/home/student" : "/home/student/" + cwdPath.slice(1).join("/");
+    appendLine(abs);
+    checkLesson(trimmed);
+    renderTree();
+    return;
+  }
+
+  if(trimmed === "ls" || trimmed === "ls -a" || trimmed === "ls -la" || trimmed === "ls -al"){
+    const node = resolveNode(cwdPath);
+    const showHidden = trimmed !== "ls";
+    const entries = Object.values(node.children)
+      .filter(c => showHidden || !c.hidden)
+      .sort((a,b) => a.name.localeCompare(b.name));
+    if(entries.length === 0){
+      appendLine("(empty directory)", "out-system");
+    } else {
+      const parts = entries.map(c => {
+        const cls = c.type === 'dir' ? 'out-dir' : (c.hidden ? 'out-hidden' : '');
+        const label = c.type === 'dir' ? c.name + '/' : c.name;
+        return '<span class="'+cls+'">' + label + '</span>';
+      });
+      appendLine(parts.join('  '));
+    }
+    checkLesson(trimmed);
+    renderTree();
+    return;
+  }
+
+  if(trimmed === "cd .." ){
+    if(cwdPath.length === 1){
+      appendLine("Already at the top of this sandbox (/home/student) — nowhere further up to go.", "out-system");
+    } else {
+      cwdPath.pop();
+    }
+    checkLesson(trimmed);
+    renderTree();
+    return;
+  }
+
+  if(trimmed === "cd" || trimmed === "cd ~" || trimmed === "cd /home/student"){
+    cwdPath = ["student"];
+    checkLesson(trimmed);
+    renderTree();
+    return;
+  }
+
+  if(trimmed.startsWith("cd ")){
+    const target = trimmed.slice(3).trim();
+    const node = resolveNode(cwdPath);
+    const child = node.children[target];
+    if(!child){
+      appendLine("cd: no such file or directory: " + target, "out-error");
+    } else if(child.type !== "dir"){
+      appendLine("cd: not a directory: " + target, "out-error");
+    } else {
+      cwdPath.push(target);
+    }
+    checkLesson(trimmed);
+    renderTree();
+    return;
+  }
+
+  appendLine("command not found: " + trimmed.split(" ")[0] + "  (try: pwd, ls, ls -a, cd, cd ..)", "out-error");
+  checkLesson(trimmed);
+  renderTree();
+}
+
+/* ---------------- Lesson logic ---------------- */
+function loadLesson(i){
+  const L = lessons[i];
+  el.lessonCmd.textContent = L.cmd;
+  el.lessonTitle.textContent = L.title;
+  el.lessonDesc.innerHTML = L.desc;
+  el.lessonWhy.innerHTML = L.why;
+  el.hintText.style.display = "none";
+  el.hintText.innerHTML = L.hint;
+  el.completeBanner.style.display = "none";
+  el.nextBtn.style.display = "none";
+  lessonDone = false;
+  lessonAttempts = 0;
+  lessonHintUsed = false;
+  renderProgress();
+}
+
+function renderProgress(){
+  el.progressTrack.innerHTML = "";
+  lessons.forEach((l, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < currentLesson ? ' done' : (i === currentLesson ? ' active' : ''));
+    el.progressTrack.appendChild(d);
+  });
+  if(currentLesson < lessons.length){
+    el.progressLabel.textContent = "Lesson " + (currentLesson+1) + " of " + lessons.length;
+  } else {
+    el.progressLabel.textContent = "All lessons complete — free practice mode";
+  }
+}
+
+function updateScoreBadge(){
+  el.scoreBadge.textContent = "Score: " + score + " / " + MAX_SCORE;
+  el.scoreBadge.classList.add('bump');
+  setTimeout(() => el.scoreBadge.classList.remove('bump'), 200);
+}
+
+function checkLesson(inputTrimmed){
+  if(currentLesson >= lessons.length || lessonDone) return;
+  const L = lessons[currentLesson];
+  const isMeta = inputTrimmed === "" || inputTrimmed === "help" || inputTrimmed === "clear";
+
+  if(L.check(inputTrimmed)){
+    lessonDone = true;
+    const deduction = (lessonAttempts * 3) + (lessonHintUsed ? 5 : 0);
+    const points = Math.max(5, MAX_PER_LESSON - deduction);
+    score += points;
+    results.push({ cmd: L.cmd, points: points, attempts: lessonAttempts, hintUsed: lessonHintUsed });
+    updateScoreBadge();
+
+    el.completeBanner.style.display = "block";
+    el.completeBanner.innerHTML = "✓ Nailed it. That's <b>" + L.cmd + "</b>." +
+      "<span class='points-chip'>+" + points + " pts</span>";
+    el.nextBtn.style.display = (currentLesson < lessons.length - 1) ? "inline-block" : "none";
+
+    if(currentLesson === lessons.length - 1){
+      el.completeBanner.innerHTML += "<br><br>🎉 You've covered pwd, ls, ls -a, cd, and cd .. — the five commands you'll type most, every single day. Scroll down and keep practicing freely below; nothing here is locked anymore.";
+      currentLesson = lessons.length; // move into free mode
+      renderProgress();
+      renderScorecard();
+    }
+  } else if(!isMeta){
+    lessonAttempts++;
+  }
+}
+
+function renderScorecard(){
+  el.scorecard.style.display = "block";
+  el.scorecard.innerHTML = "";
+  results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'sc-row';
+    const attemptNote = r.attempts > 0 ? (r.attempts + (r.attempts === 1 ? " retry" : " retries")) : "first try";
+    const hintNote = r.hintUsed ? ", hint used" : "";
+    row.innerHTML =
+      '<div><span class="sc-cmd">' + r.cmd + '</span><span class="sc-meta">' + attemptNote + hintNote + '</span></div>' +
+      '<div class="sc-pts">+' + r.points + '</div>';
+    el.scorecard.appendChild(row);
+  });
+  const total = document.createElement('div');
+  total.className = 'sc-row total';
+  const pct = Math.round((score / MAX_SCORE) * 100);
+  let verdict = "Keep practicing";
+  if(pct === 100) verdict = "Perfect score";
+  else if(pct >= 85) verdict = "Excellent";
+  else if(pct >= 70) verdict = "Solid work";
+  else if(pct >= 50) verdict = "Passed";
+  total.innerHTML = '<div>Total — ' + verdict + '</div><div>' + score + ' / ' + MAX_SCORE + '</div>';
+  el.scorecard.appendChild(total);
+  el.retryBtn.style.display = "inline-block";
+}
+
+function resetAssignment(){
+  currentLesson = 0;
+  score = 0;
+  results.length = 0;
+  el.scorecard.style.display = "none";
+  el.retryBtn.style.display = "none";
+  updateScoreBadge();
+  loadLesson(0);
+}
+el.retryBtn.addEventListener('click', resetAssignment);
+
+el.nextBtn.addEventListener('click', () => {
+  currentLesson++;
+  loadLesson(currentLesson);
+});
+
+el.hintBtn.addEventListener('click', () => {
+  el.hintText.style.display = el.hintText.style.display === "none" ? "block" : "none";
+  lessonHintUsed = true;
+});
+
+/* ---------------- Tree rendering ---------------- */
+function renderTree(){
+  el.tree.innerHTML = "";
+  function walk(node, path, depth){
+    Object.values(node.children)
+      .sort((a,b) => {
+        if(a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      })
+      .forEach(child => {
+        const childPath = path.concat(child.name);
+        const isCurrent = childPath.length === cwdPath.length &&
+          childPath.every((seg,i) => seg === cwdPath[i]);
+        const line = document.createElement('div');
+        let cls = 'tree-line';
+        if(child.type === 'dir') cls += ' is-dir';
+        else cls += ' is-file';
+        if(child.hidden) cls += ' is-hidden';
+        if(isCurrent) cls += ' current';
+        line.className = cls;
+        const indent = '&nbsp;&nbsp;'.repeat(depth);
+        const glyph = child.type === 'dir' ? '📁' : '📄';
+        line.innerHTML = '<span class="tglyph">' + indent + (depth>0?'└─ ':'') + '</span>' +
+          glyph + ' ' + child.name + (child.type==='dir' ? '/' : '') + (isCurrent ? '  ←' : '');
+        el.tree.appendChild(line);
+        if(child.type === 'dir'){
+          walk(child, childPath, depth+1);
+        }
+      });
+  }
+  const rootLine = document.createElement('div');
+  const rootIsCurrent = cwdPath.length === 1;
+  rootLine.className = 'tree-line is-dir' + (rootIsCurrent ? ' current' : '');
+  rootLine.innerHTML = '📁 student/' + (rootIsCurrent ? '  ←' : '');
+  el.tree.appendChild(rootLine);
+  walk(fs, ["student"], 1);
+}
+
+/* ---------------- Input handling ---------------- */
+el.input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    const val = el.input.value;
+    if(val.trim() !== ""){
+      history.push(val);
+      historyPtr = history.length;
+    }
+    el.input.value = "";
+    runCommand(val);
+    renderPrompt();
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    if(historyPtr > 0){ historyPtr--; el.input.value = history[historyPtr]; }
+  } else if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    if(historyPtr < history.length - 1){ historyPtr++; el.input.value = history[historyPtr]; }
+    else { historyPtr = history.length; el.input.value = ""; }
+  }
+});
+
+document.getElementById('terminal').addEventListener('click', () => el.input.focus());
+document.body.addEventListener('click', (e) => {
+  if(e.target.closest('.term-panel')) el.input.focus();
+});
+
+/* ---------------- Boot ---------------- */
+function boot(){
+  renderPrompt();
+  renderTree();
+  el.scoreBadge.textContent = "Score: 0 / " + MAX_SCORE;
+  loadLesson(0);
+  appendLine("Welcome. This is a practice Linux filesystem — nothing here is real, so there's nothing to break.", "out-system");
+  appendLine("Follow the lesson on the left, or type <b>help</b> any time.", "out-system");
+  el.input.focus();
+}
+boot();
+</script>
+</body>
+</html>
