@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>cd . — Linux Navigation Trainer</title>
+<title>Linux Practical Examination</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -33,7 +33,7 @@
     min-height:100vh;
     padding:28px 20px 60px;
   }
-  .wrap{max-width:1180px;margin:0 auto;}
+  .wrap{max-width:1180px;margin:0 auto; position:relative;}
 
   header{
     display:flex; align-items:flex-end; justify-content:space-between;
@@ -47,61 +47,32 @@
     border:1px solid var(--line);
     display:flex;align-items:center;justify-content:center;
     font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--neon-mint);
-    font-size:18px;
+    font-size:16px;
   }
   h1{font-size:22px;margin:0;font-weight:600;letter-spacing:0.2px;}
   h1 span{color:var(--neon-mint);}
-  .tagline{color:var(--dim); font-size:13px; margin-top:3px; font-family:'JetBrains Mono',monospace;}
+  .tagline{color:var(--dim); font-size:12.5px; margin-top:3px; font-family:'JetBrains Mono',monospace;}
 
-  .progress-track{display:flex; gap:8px; align-items:center;}
-  .dot{
-    width:34px; height:6px; border-radius:4px; background:var(--line);
-    transition:background .3s ease;
-    position:relative;
+  .header-right{display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+  .stat-row{display:flex; gap:10px; align-items:center;}
+  .stat-chip{
+    font-family:'JetBrains Mono',monospace; font-size:12.5px; font-weight:600;
+    border-radius:7px; padding:6px 11px; border:1px solid var(--line); color:var(--dim);
   }
-  .dot.done{background:var(--neon-mint);}
-  .dot.active{background:var(--neon-cyan);}
-  .progress-label{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--dim); margin-left:6px;}
-
-  #score-badge{
-    font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600;
-    color:var(--neon-mint); background:rgba(43,255,168,0.08);
-    border:1px solid rgba(43,255,168,0.3); border-radius:7px;
-    padding:5px 11px; margin-top:8px; display:inline-block;
-    transition:transform .15s ease;
-  }
-  #score-badge.bump{transform:scale(1.08);}
-
-  .points-chip{
-    font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700;
-    color:#04120c; background:var(--neon-mint);
-    border-radius:5px; padding:2px 7px; margin-left:8px;
-  }
-
-  #scorecard{
-    margin-top:14px; border:1px solid var(--line); border-radius:9px;
-    overflow:hidden; display:none;
-  }
-  .sc-row{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:9px 13px; font-size:13px; border-bottom:1px solid var(--line);
-    font-family:'JetBrains Mono',monospace;
-  }
-  .sc-row:last-child{border-bottom:none;}
-  .sc-row.total{background:var(--panel-raised); font-weight:700; color:var(--neon-mint);}
-  .sc-cmd{color:var(--text); font-weight:600;}
-  .sc-meta{color:var(--dimmer); font-size:11px; margin-left:8px;}
-  .sc-pts{color:var(--neon-mint); font-weight:700;}
-  #retry-btn{
-    margin-top:12px; background:none; border:1px solid var(--dimmer); color:var(--dim);
+  .stat-chip.tasks{color:var(--neon-mint); border-color:rgba(43,255,168,0.3); background:rgba(43,255,168,0.06);}
+  .stat-chip.timer{color:var(--neon-cyan); border-color:rgba(78,225,255,0.3); background:rgba(78,225,255,0.06);}
+  #submit-btn{
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:13px;
+    background:none; border:1px solid var(--error); color:var(--error);
     padding:8px 16px; border-radius:7px; cursor:pointer;
-    font-family:'Space Grotesk',sans-serif; font-size:13px;
   }
-  #retry-btn:hover{border-color:var(--neon-cyan); color:var(--neon-cyan);}
+  #submit-btn:hover{background:rgba(255,93,122,0.08);}
+  #submit-btn.armed{background:var(--error); color:#160409;}
+  #submit-btn:disabled{opacity:0.35; cursor:not-allowed;}
 
   .grid{
     display:grid;
-    grid-template-columns: 1.05fr 1fr 0.78fr;
+    grid-template-columns: 0.85fr 1.3fr;
     gap:18px;
     align-items:start;
   }
@@ -120,53 +91,35 @@
     color:var(--dim); margin:0 0 14px; font-weight:600;
   }
 
-  /* LESSON PANEL */
-  #lesson-cmd{
-    font-family:'JetBrains Mono',monospace;
-    font-size:20px; font-weight:600; color:var(--neon-mint);
-    background:var(--panel-raised);
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:10px 14px;
-    margin-bottom:14px;
-    display:inline-block;
+  /* OBJECTIVES PANEL */
+  #objectives-intro{color:var(--dim); font-size:13px; line-height:1.55; margin-bottom:16px;}
+  #objectives-list{display:flex; flex-direction:column; gap:10px; max-height:600px; overflow-y:auto; padding-right:4px;}
+  #objectives-list::-webkit-scrollbar{width:6px;}
+  #objectives-list::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+  .obj-row{
+    display:flex; gap:12px; padding:12px 13px; border:1px solid var(--line);
+    border-radius:9px; background:var(--panel-raised); transition:border-color .2s;
   }
-  #lesson-title{font-size:17px; font-weight:600; margin:0 0 8px;}
-  #lesson-desc{color:var(--dim); font-size:14.5px; line-height:1.55; margin-bottom:16px;}
-  #lesson-desc b{color:var(--text); font-weight:600;}
-  .why-box{
-    border-left:2px solid var(--neon-cyan);
-    padding:10px 14px;
-    background:rgba(78,225,255,0.05);
-    border-radius:0 8px 8px 0;
-    font-size:13px; color:var(--dim); line-height:1.5;
-    margin-bottom:16px;
+  .obj-row.obj-done{border-color:rgba(43,255,168,0.4); background:rgba(43,255,168,0.05);}
+  .obj-num{
+    flex:0 0 24px; height:24px; border-radius:6px; background:rgba(78,225,255,0.08);
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--dim); font-weight:700;
   }
-  .why-box b{color:var(--neon-cyan); font-weight:600;}
-  #hint-btn{
-    background:none; border:1px dashed var(--dimmer); color:var(--dim);
+  .obj-row.obj-done .obj-num{background:rgba(43,255,168,0.15); color:var(--neon-mint); border-color:rgba(43,255,168,0.4);}
+  .obj-text{font-size:13.2px; line-height:1.55; color:var(--text);}
+  .obj-text code{
+    background:rgba(78,225,255,0.08); color:var(--neon-cyan); font-family:'JetBrains Mono',monospace;
+    font-size:12px; padding:1.5px 6px; border-radius:4px;
+  }
+  .obj-quote{
+    display:inline-block; margin-top:6px; padding:5px 10px; background:var(--bg);
+    border:1px solid var(--line); border-radius:6px; color:var(--neon-amber);
     font-family:'JetBrains Mono',monospace; font-size:12px;
-    padding:7px 12px; border-radius:6px; cursor:pointer;
   }
-  #hint-btn:hover{border-color:var(--neon-amber); color:var(--neon-amber);}
-  #hint-text{
-    display:none; margin-top:10px; font-size:13px; color:var(--neon-amber);
-    font-family:'JetBrains Mono',monospace;
-  }
-  #lesson-complete-banner{
-    display:none; margin-top:16px; background:rgba(43,255,168,0.08);
-    border:1px solid rgba(43,255,168,0.35); border-radius:8px;
-    padding:12px 14px; font-size:13.5px; color:var(--neon-mint);
-  }
-  #next-btn{
-    margin-top:12px; background:var(--neon-mint); color:#04120c;
-    border:none; font-weight:700; padding:9px 18px; border-radius:7px;
-    cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:13.5px;
-  }
-  #next-btn:hover{filter:brightness(1.08);}
 
   /* TERMINAL PANEL */
-  .term-panel{padding:0; overflow:hidden;}
+  .term-panel{padding:0; overflow:hidden; position:relative;}
   .term-titlebar{
     background:var(--panel-raised); padding:10px 14px;
     display:flex; align-items:center; gap:8px;
@@ -179,7 +132,7 @@
   }
   #terminal{
     font-family:'JetBrains Mono',monospace; font-size:13.5px; line-height:1.6;
-    padding:16px; height:420px; overflow-y:auto; color:var(--text);
+    padding:16px; height:560px; overflow-y:auto; color:var(--text);
     cursor:text;
   }
   #terminal::-webkit-scrollbar{width:8px;}
@@ -194,29 +147,84 @@
   .out-error{color:var(--error);}
   .out-system{color:var(--dim); font-style:italic;}
   .out-success{color:var(--neon-mint);}
-  #input-row{display:flex; align-items:center;}
+  #input-row{display:flex; align-items:center; padding:0 16px 14px;}
   #cmd-input{
     flex:1; background:transparent; border:none; outline:none;
     color:var(--text); font-family:'JetBrains Mono',monospace; font-size:13.5px;
     caret-color:var(--neon-mint);
   }
+  #cmd-input:disabled{opacity:0.3;}
   .cursor-blink{
     display:inline-block; width:7px; height:15px; background:var(--neon-mint);
     animation:blink 1s step-end infinite; margin-left:2px; vertical-align:middle;
   }
   @keyframes blink{50%{opacity:0;}}
 
-  /* MAP PANEL */
-  #tree{font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.9;}
-  .tree-line{white-space:nowrap; padding:2px 6px; border-radius:5px; transition:background .2s;}
-  .tree-line.current{background:rgba(43,255,168,0.1); color:var(--neon-mint); font-weight:600;}
-  .tree-line .tglyph{color:var(--dimmer);}
-  .tree-line.is-dir{color:var(--dir-color);}
-  .tree-line.is-hidden{color:var(--neon-amber); opacity:0.85;}
-  .tree-line.is-file{color:var(--dim);}
-  #legend{margin-top:16px; font-size:11.5px; color:var(--dimmer); display:flex; flex-direction:column; gap:6px;}
-  #legend div{display:flex; align-items:center; gap:7px;}
-  .swatch{width:9px;height:9px;border-radius:2px;}
+  /* EDITOR OVERLAY (nano/vim simulation) */
+  #editor-overlay{
+    position:absolute; inset:0; background:var(--bg); display:none;
+    flex-direction:column; z-index:20;
+  }
+  .editor-titlebar{
+    background:#2b2f77; color:#e9ecff; padding:6px 14px; font-family:'JetBrains Mono',monospace;
+    font-size:12.5px; text-align:center;
+  }
+  #editor-textarea{
+    flex:1; background:var(--bg); color:var(--text); border:none; outline:none;
+    font-family:'JetBrains Mono',monospace; font-size:13.5px; line-height:1.6;
+    padding:14px 16px; resize:none;
+  }
+  .editor-footer{
+    background:var(--panel-raised); border-top:1px solid var(--line);
+    padding:10px 14px; display:flex; justify-content:space-between; align-items:center;
+    flex-wrap:wrap; gap:10px;
+  }
+  .editor-hints{font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--dim);}
+  .editor-btns{display:flex; gap:8px;}
+  .editor-btn{
+    font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:700;
+    border-radius:6px; padding:7px 13px; cursor:pointer; border:1px solid var(--line);
+  }
+  .editor-btn.save{background:var(--neon-mint); color:#04120c; border:none;}
+  .editor-btn.discard{background:none; color:var(--dim);}
+  .editor-btn.discard:hover{color:var(--error); border-color:var(--error);}
+
+  /* START / RESULTS OVERLAYS */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(3,6,12,0.85); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+  }
+  .modal-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    max-width:560px; width:100%; padding:30px 32px; max-height:85vh; overflow-y:auto;
+  }
+  .modal-card h2{font-size:19px; color:var(--text); margin:0 0 12px; text-transform:none; letter-spacing:0; font-weight:600;}
+  .modal-card p{color:var(--dim); font-size:13.5px; line-height:1.6;}
+  .modal-card ul{color:var(--dim); font-size:13px; line-height:1.8; padding-left:20px;}
+  .modal-card code{background:var(--panel-raised); color:var(--neon-cyan); font-family:'JetBrains Mono',monospace; padding:1.5px 6px; border-radius:4px; font-size:12px;}
+  .primary-btn{
+    margin-top:14px; background:var(--neon-mint); color:#04120c; border:none; font-weight:700;
+    padding:11px 22px; border-radius:8px; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-size:14px;
+  }
+  .primary-btn:hover{filter:brightness(1.08);}
+
+  .score-hero{text-align:center; margin:14px 0 20px;}
+  .score-hero .num{font-family:'JetBrains Mono',monospace; font-size:52px; font-weight:700; color:var(--neon-mint);}
+  .score-hero .denom{font-size:16px; color:var(--dim);}
+  .breakdown-row{
+    display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace; font-size:12.5px;
+  }
+  .breakdown-row .lbl{color:var(--dim);}
+  .breakdown-row .val{color:var(--text); font-weight:600;}
+  .breakdown-row .val.neg{color:var(--error);}
+  .breakdown-row .val.pos{color:var(--neon-mint);}
+  #results-missions{margin-top:16px; display:flex; flex-direction:column; gap:6px;}
+  .rm-row{display:flex; gap:10px; align-items:flex-start; font-size:12.5px; padding:6px 0;}
+  .rm-icon{flex:0 0 16px; font-weight:700;}
+  .rm-icon.pass{color:var(--neon-mint);}
+  .rm-icon.fail{color:var(--error);}
+  .rm-text{color:var(--dim); line-height:1.5;}
 
   footer{
     margin-top:26px; text-align:center; color:var(--dimmer);
@@ -229,190 +237,454 @@
 
   <header>
     <div class="brand">
-      <div class="brand-mark">~$</div>
+      <div class="brand-mark">#</div>
       <div>
-        <h1>cd <span>.</span> — Linux Navigation Trainer</h1>
-        <div class="tagline">pwd · ls · ls -a · cd · cd .. — learn by actually typing them</div>
+        <h1>Linux Practical <span>Examination</span></h1>
+        <div class="tagline">pwd · ls · cd · tree · mkdir · rmdir · touch · cp · mv · rm · rename · cat · less · more · head · tail · nl · nano · vim</div>
       </div>
     </div>
-    <div style="text-align:right;">
-      <div class="progress-track" id="progress-track"></div>
-      <div class="progress-label" id="progress-label">Lesson 1 of 5</div>
-      <div id="score-badge">Score: 0 / 100</div>
+    <div class="header-right">
+      <div class="stat-row">
+        <div class="stat-chip tasks" id="tasks-chip">Tasks: 0/0</div>
+        <div class="stat-chip timer" id="timer-chip">00:00</div>
+        <button id="submit-btn" disabled>Submit Exam</button>
+      </div>
     </div>
   </header>
 
   <div class="grid">
 
-    <!-- LESSON PANEL -->
-    <div class="panel" id="lesson-panel">
-      <h2>Current lesson</h2>
-      <div id="lesson-cmd">pwd</div>
-      <div id="lesson-title">Where am I?</div>
-      <div id="lesson-desc"></div>
-      <div class="why-box" id="lesson-why"></div>
-      <button id="hint-btn">Show a hint</button>
-      <div id="hint-text"></div>
-      <div id="lesson-complete-banner"></div>
-      <div><button id="next-btn" style="display:none;">Next command →</button></div>
-      <div id="scorecard"></div>
-      <div><button id="retry-btn" style="display:none;">Reset & retry for full marks</button></div>
+    <!-- OBJECTIVES PANEL -->
+    <div class="panel" id="objectives-panel">
+      <h2>Exam objectives</h2>
+      <div id="objectives-intro">Complete every objective below using the terminal. No hints, no suggestions — determine the required commands yourself. Your filesystem and tasks are unique to this session.</div>
+      <div id="objectives-list"></div>
     </div>
 
     <!-- TERMINAL PANEL -->
     <div class="panel term-panel">
       <div class="term-titlebar">
         <div class="term-dot r"></div><div class="term-dot y"></div><div class="term-dot g"></div>
-        <span>student@practice-box: bash</span>
+        <span>student@examhost: bash</span>
       </div>
       <div id="terminal" tabindex="0"></div>
-      <div style="padding:0 16px 14px;">
-        <div id="input-row">
-          <span class="prompt-line" id="live-prompt"></span>
-          <input id="cmd-input" autocomplete="off" spellcheck="false" autofocus />
-          <span class="cursor-blink"></span>
-        </div>
+      <div id="input-row">
+        <span class="prompt-line" id="live-prompt"></span>
+        <input id="cmd-input" autocomplete="off" spellcheck="false" disabled />
+        <span class="cursor-blink"></span>
       </div>
-    </div>
 
-    <!-- MAP PANEL -->
-    <div class="panel">
-      <h2>Filesystem map</h2>
-      <div id="tree"></div>
-      <div id="legend">
-        <div><span class="swatch" style="background:var(--dir-color)"></span> folder</div>
-        <div><span class="swatch" style="background:var(--dim)"></span> regular file</div>
-        <div><span class="swatch" style="background:var(--neon-amber)"></span> hidden (dotfile)</div>
-        <div><span class="swatch" style="background:var(--neon-mint)"></span> you are here</div>
+      <!-- Simulated nano/vim editor overlay -->
+      <div id="editor-overlay">
+        <div class="editor-titlebar" id="editor-titlebar"></div>
+        <textarea id="editor-textarea" spellcheck="false"></textarea>
+        <div class="editor-footer">
+          <div class="editor-hints" id="editor-hints"></div>
+          <div class="editor-btns">
+            <button class="editor-btn discard" id="editor-discard-btn">Discard &amp; Exit</button>
+            <button class="editor-btn save" id="editor-save-btn">Save &amp; Exit</button>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 
-  <footer>Type commands directly into the terminal — Enter to run, ↑ / ↓ to recall history, "clear" to wipe the screen, "help" any time.</footer>
+  <footer>Type commands into the terminal — Enter to run, ↑ / ↓ for history, Tab to complete, "clear" to wipe the screen. Absolute and relative paths both work.</footer>
+
+  <!-- START OVERLAY -->
+  <div class="modal-overlay" id="start-overlay">
+    <div class="modal-card">
+      <h2>Linux Practical Examination</h2>
+      <p>You will be dropped into a randomized home directory containing real files and folders. A set of objectives will be listed on the left — each describes an outcome, not a command. You must figure out which commands achieve it.</p>
+      <ul>
+        <li>No lessons, hints, or command suggestions are provided.</li>
+        <li>Supported commands: pwd, ls, cd, tree, mkdir, rmdir, touch, cp, mv, rm, rename, cat, less, more, head, tail, nl, nano, vim, clear, history.</li>
+        <li>Both absolute (<code>/home/student/...</code>) and relative paths work, along with <code>~</code>, <code>.</code>, and <code>..</code>.</li>
+        <li>You're scored on task completion, accuracy, efficiency, and time. The correct solutions are never revealed — before or after submission.</li>
+        <li>Every session generates a brand-new filesystem and objective set.</li>
+      </ul>
+      <button class="primary-btn" id="start-btn">Begin Examination</button>
+    </div>
+  </div>
+
+  <!-- RESULTS OVERLAY -->
+  <div class="modal-overlay" id="results-overlay" style="display:none;">
+    <div class="modal-card">
+      <h2>Examination Results</h2>
+      <div class="score-hero"><span class="num" id="score-num">0</span><span class="denom"> / 100</span></div>
+      <div id="breakdown"></div>
+      <div id="results-missions"></div>
+      <button class="primary-btn" id="restart-btn">Start New Exam</button>
+    </div>
+  </div>
+
 </div>
 
 <script>
-/* ---------------- Virtual filesystem ---------------- */
-const fs = {
-  name: "student", type: "dir", hidden:false,
-  children: {
-    "documents": { name:"documents", type:"dir", hidden:false, children:{
-      "notes.txt": {name:"notes.txt", type:"file", hidden:false, children:{}},
-      "todo.md": {name:"todo.md", type:"file", hidden:false, children:{}},
-      ".draft.txt": {name:".draft.txt", type:"file", hidden:true, children:{}}
-    }},
-    "projects": { name:"projects", type:"dir", hidden:false, children:{
-      "cyberlab": { name:"cyberlab", type:"dir", hidden:false, children:{
-        "readme.md": {name:"readme.md", type:"file", hidden:false, children:{}}
-      }},
-      "readme.md": {name:"readme.md", type:"file", hidden:false, children:{}}
-    }},
-    "photos": { name:"photos", type:"dir", hidden:false, children:{
-      "vacation.jpg": {name:"vacation.jpg", type:"file", hidden:false, children:{}}
-    }},
-    ".bashrc": {name:".bashrc", type:"file", hidden:true, children:{}},
-    ".config": { name:".config", type:"dir", hidden:true, children:{
-      "settings.conf": {name:"settings.conf", type:"file", hidden:false, children:{}}
-    }}
-  }
-};
+/* =========================================================
+   UTILITIES
+========================================================= */
+function randInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pad(n){ return n.toString().padStart(2,'0'); }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function randChoice(arr){ return arr[randInt(0,arr.length-1)]; }
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hasFlag(args, ch){ return args.some(a => a.length>1 && a[0]==='-' && a[1]!=='-' && a.slice(1).includes(ch)); }
+function key(segs){ return segs.join('/'); }
 
-let cwdPath = ["student"]; // path segments from root
+/* =========================================================
+   VIRTUAL FILESYSTEM
+========================================================= */
+const HOME_SEG = ['home','student'];
+let ROOT, cwd;
 
-function resolveNode(path){
-  let node = fs;
-  for(let i=1;i<path.length;i++){
-    node = node.children[path[i]];
-    if(!node) return null;
+function freshRoot(){
+  return {
+    type:'dir', name:'/', hidden:false, children:{
+      home: { type:'dir', name:'home', hidden:false, children:{
+        student: { type:'dir', name:'student', hidden:false, children:{} }
+      }}
+    }
+  };
+}
+
+function getNode(segs){
+  let node = ROOT;
+  for(const s of segs){
+    if(!node || node.type!=='dir' || !node.children[s]) return null;
+    node = node.children[s];
   }
   return node;
 }
 
-function promptPathString(){
-  // show ~ for home
-  return "~" + (cwdPath.length>1 ? "/" + cwdPath.slice(1).join("/") : "");
+function resolvePath(str){
+  if(str===undefined || str==='') return cwd.slice();
+  let segs;
+  if(str.startsWith('/')) segs = [];
+  else if(str==='~') return HOME_SEG.slice();
+  else if(str.startsWith('~/')){ segs = HOME_SEG.slice(); str = str.slice(2); }
+  else segs = cwd.slice();
+  const parts = str.split('/').filter(p=>p.length>0);
+  for(const p of parts){
+    if(p==='.') continue;
+    else if(p==='..'){ if(segs.length>0) segs.pop(); }
+    else segs.push(p);
+  }
+  return segs;
 }
 
-/* ---------------- Lessons ---------------- */
-const lessons = [
-  {
-    cmd: "pwd",
-    title: "Where am I?",
-    desc: "Every terminal session starts somewhere. <b>pwd</b> stands for <b>print working directory</b> — it just prints the folder you're currently standing in.",
-    why: "<b>Why it matters:</b> before you move or touch anything, you confirm your location. Every real investigation, every deployment script, starts with knowing exactly where you are.",
-    hint: "Type <b>pwd</b> and press Enter. No arguments needed.",
-    check: (input) => input.trim() === "pwd"
-  },
-  {
-    cmd: "ls",
-    title: "What's in this folder?",
-    desc: "<b>ls</b> lists the contents of your current directory — the files and folders sitting right where you are.",
-    why: "<b>Why it matters:</b> pwd tells you where you are, ls tells you what's around you. Together they're how you orient yourself in any system.",
-    hint: "Type <b>ls</b> and press Enter.",
-    check: (input) => input.trim() === "ls"
-  },
-  {
-    cmd: "ls -a",
-    title: "The hidden files",
-    desc: "Plain <b>ls</b> skips anything starting with a dot. Add the <b>-a</b> flag (\"all\") and it shows everything, dotfiles included — like <b>.bashrc</b> and <b>.config</b>.",
-    why: "<b>Why it matters:</b> config files, credentials, and settings almost always live as dotfiles. In security work, what's hidden by default is often exactly what you need to check.",
-    hint: "Type <b>ls -a</b> — a space, then a dash, then the letter a.",
-    check: (input) => input.trim() === "ls -a" || input.trim() === "ls -la" || input.trim() === "ls -al"
-  },
-  {
-    cmd: "cd documents",
-    title: "Moving into a folder",
-    desc: "<b>cd</b> means <b>change directory</b>. Follow it with a folder name to step inside it. Try moving into the <b>documents</b> folder you can see in the map on the right.",
-    why: "<b>Why it matters:</b> this is how you actually navigate a filesystem instead of just looking at it — the core move you'll repeat thousands of times.",
-    hint: "Type <b>cd documents</b> and press Enter.",
-    check: (input) => input.trim() === "cd documents"
-  },
-  {
-    cmd: "cd ..",
-    title: "Stepping back out",
-    desc: "<b>..</b> always means \"the parent folder, one level up.\" So <b>cd ..</b> takes you back out of wherever you are.",
-    why: "<b>Why it matters:</b> you'll dig into deep folder trees constantly. cd .. is your way back, one step at a time, without needing to know the full path.",
-    hint: "Type <b>cd ..</b> — two dots, no space between them.",
-    check: (input) => input.trim() === "cd .."
+function absPathStr(segs){ return '/' + segs.join('/'); }
+function displayPathStr(segs){
+  if(segs.length>=HOME_SEG.length && HOME_SEG.every((s,i)=>segs[i]===s)){
+    const rest = segs.slice(HOME_SEG.length);
+    return '~' + (rest.length ? '/'+rest.join('/') : '');
   }
+  return absPathStr(segs);
+}
+function promptPathString(){ return displayPathStr(cwd); }
+
+function cloneNode(node, newName){
+  if(node.type==='file') return { type:'file', name:newName, hidden:newName.startsWith('.'), content:node.content };
+  const children = {};
+  for(const k in node.children){ children[k] = cloneNode(node.children[k], node.children[k].name); }
+  return { type:'dir', name:newName, hidden:newName.startsWith('.'), children };
+}
+
+/* =========================================================
+   RANDOM FILESYSTEM GENERATION
+========================================================= */
+const DIR_NAMES = ['reports','logs','backup','scripts','config','archive','media','downloads','assets','build','docs','photos','projects','temp','exports','clients','staging'];
+const FILE_TEMPLATES = [
+  {base:'notes', ext:'txt'}, {base:'readme', ext:'md'}, {base:'data', ext:'csv'},
+  {base:'server', ext:'log'}, {base:'access', ext:'log'}, {base:'config', ext:'yaml'},
+  {base:'deploy', ext:'sh'}, {base:'summary', ext:'txt'}, {base:'inventory', ext:'csv'},
+  {base:'todo', ext:'md'}, {base:'error', ext:'log'}, {base:'settings', ext:'conf'}
+];
+const PHRASE_POOL = [
+  'Deployment version 3.2 approved',
+  'Backup completed successfully',
+  'Access restricted to admin only',
+  'Server migration scheduled for Friday',
+  'All systems operational',
+  'Pending review from security team',
+  'Configuration updated by administrator',
+  'Incident resolved and documented',
+  'Quarterly audit passed with no findings',
+  'New employee onboarding complete'
 ];
 
-let currentLesson = 0;
-let lessonDone = false;
-let lessonAttempts = 0;
-let lessonHintUsed = false;
-let score = 0;
-const MAX_PER_LESSON = 20;
-const MAX_SCORE = lessons.length * MAX_PER_LESSON;
-const results = []; // {cmd, points, attempts, hintUsed}
+function makeFileContent(ext, n){
+  const lines = [];
+  if(ext==='log'){
+    for(let i=0;i<n;i++){
+      lines.push(`2026-0${randInt(1,7)}-${pad(randInt(1,28))} ${pad(randInt(0,23))}:${pad(randInt(0,59))}:${pad(randInt(0,59))} [${randChoice(['INFO','WARN','ERROR','DEBUG'])}] ${randChoice(['connection accepted','request timeout','user authenticated','disk usage high','cache cleared','service restarted','config reloaded','backup started','backup finished'])}`);
+    }
+  } else if(ext==='csv'){
+    lines.push('id,name,value');
+    for(let i=1;i<=n;i++) lines.push(`${i},item${i},${randInt(10,999)}`);
+  } else {
+    for(let i=1;i<=n;i++) lines.push(`Line ${i}: ${randChoice(['the quick fox jumps','system check passed','pending review','draft content','placeholder text','needs revision','final version','awaiting approval'])}`);
+  }
+  return lines;
+}
+
+function buildFS(){
+  ROOT = freshRoot();
+  cwd = HOME_SEG.slice();
+  const home = getNode(HOME_SEG);
+
+  home.children['.bashrc'] = { type:'file', name:'.bashrc', hidden:true, content:'export PATH=$PATH:/usr/local/bin\nalias ll="ls -la"\n' };
+  home.children['.config'] = { type:'dir', name:'.config', hidden:true, children:{
+    'settings.conf': { type:'file', name:'settings.conf', hidden:false, content:'theme=dark\nautosave=true\n' }
+  }};
+
+  const dirPool = shuffle(DIR_NAMES.slice());
+  const numTopDirs = randInt(4,5);
+  const topDirNames = dirPool.slice(0, numTopDirs);
+  const filePool = shuffle(FILE_TEMPLATES.slice());
+  let cursor = 0;
+  function nextTemplate(){ const t = filePool[cursor % filePool.length]; cursor++; return t; }
+
+  const registry = { dirs:[], files:[] };
+
+  topDirNames.forEach(dn=>{
+    const dirNode = { type:'dir', name:dn, hidden:false, children:{} };
+    home.children[dn] = dirNode;
+    registry.dirs.push({ segs: HOME_SEG.concat([dn]) });
+
+    const numFiles = randInt(2,4);
+    for(let i=0;i<numFiles;i++){
+      const t = nextTemplate();
+      const fname = `${t.base}_${randInt(10,99)}.${t.ext}`;
+      if(dirNode.children[fname]) continue;
+      const n = randInt(6,14);
+      dirNode.children[fname] = { type:'file', name:fname, hidden:false, content: makeFileContent(t.ext,n).join('\n') };
+      registry.files.push({ segs: HOME_SEG.concat([dn,fname]) });
+    }
+
+    if(Math.random() < 0.6){
+      const subCandidates = dirPool.filter(x=>x!==dn);
+      const subName = randChoice(subCandidates);
+      const subNode = { type:'dir', name:subName, hidden:false, children:{} };
+      dirNode.children[subName] = subNode;
+      registry.dirs.push({ segs: HOME_SEG.concat([dn,subName]) });
+      const numSubFiles = randInt(1,3);
+      for(let i=0;i<numSubFiles;i++){
+        const t = nextTemplate();
+        const fname = `${t.base}_${randInt(10,99)}.${t.ext}`;
+        if(subNode.children[fname]) continue;
+        const n = randInt(6,14);
+        subNode.children[fname] = { type:'file', name:fname, hidden:false, content: makeFileContent(t.ext,n).join('\n') };
+        registry.files.push({ segs: HOME_SEG.concat([dn,subName,fname]) });
+      }
+    }
+  });
+
+  for(let i=0;i<2;i++){
+    const t = nextTemplate();
+    const fname = `${t.base}_${randInt(10,99)}.${t.ext}`;
+    if(home.children[fname]) continue;
+    const n = randInt(5,10);
+    home.children[fname] = { type:'file', name:fname, hidden:false, content: makeFileContent(t.ext,n).join('\n') };
+    registry.files.push({ segs: HOME_SEG.concat([fname]) });
+  }
+
+  return registry;
+}
+
+/* =========================================================
+   MISSION GENERATION
+========================================================= */
+let usedDirKeys, usedFileKeys;
+
+function pickUnusedDir(registry){
+  const cands = registry.dirs.filter(d=>!usedDirKeys.has(key(d.segs)));
+  if(!cands.length) return null;
+  const c = randChoice(cands); usedDirKeys.add(key(c.segs)); return c;
+}
+function pickUnusedFile(registry){
+  const cands = registry.files.filter(f=>!usedFileKeys.has(key(f.segs)));
+  if(!cands.length) return null;
+  const c = randChoice(cands); usedFileKeys.add(key(c.segs)); return c;
+}
+
+function genMkdir(registry){
+  const existingTop = new Set(Object.keys(getNode(HOME_SEG).children));
+  const avail = DIR_NAMES.filter(n=>!existingTop.has(n));
+  if(avail.length<2) return null;
+  const s = shuffle(avail.slice());
+  const a = s[0], b = s[1] + '_sub';
+  const text = `Create a nested directory path <code>${a}/${b}</code> inside your home directory. Neither level currently exists — both need to exist afterward.`;
+  return { text, optimalCommands:1, check: ()=>{ const n=getNode(HOME_SEG.concat([a,b])); return !!n && n.type==='dir'; } };
+}
+
+function genTouch(registry){
+  const useDir = Math.random()<0.6;
+  const dir = useDir ? pickUnusedDir(registry) : null;
+  const locSegs = dir ? dir.segs : HOME_SEG;
+  const locDisplay = dir ? `<code>${displayPathStr(dir.segs)}</code>` : 'your home directory';
+  const existingNames = new Set(Object.keys(getNode(locSegs).children));
+  const templates = shuffle(FILE_TEMPLATES.slice());
+  let fname = null;
+  for(const t of templates){ const cand = `${t.base}_new.${t.ext}`; if(!existingNames.has(cand)){ fname = cand; break; } }
+  if(!fname) return null;
+  const targetSegs = locSegs.concat([fname]);
+  const text = `Inside ${locDisplay}, create a brand-new, completely empty file named <code>${fname}</code>.`;
+  return { text, optimalCommands:1, check: ()=>{ const n=getNode(targetSegs); return !!n && n.type==='file'; } };
+}
+
+function genEdit(registry){
+  const f = pickUnusedFile(registry);
+  if(!f) return null;
+  const phrase = randChoice(PHRASE_POOL);
+  const display = displayPathStr(f.segs);
+  const text = `Open <code>${display}</code> in a text editor (nano or vim) and replace its entire contents with exactly this line:<div class="obj-quote">${escapeHtml(phrase)}</div>`;
+  return { text, optimalCommands:1, check: ()=>{ const n=getNode(f.segs); return !!n && n.type==='file' && n.content.trim()===phrase; } };
+}
+
+function genCopy(registry){
+  const f = pickUnusedFile(registry);
+  if(!f) return null;
+  const srcParentKey = key(f.segs.slice(0,-1));
+  let dest = pickUnusedDir(registry), tries=0;
+  while(dest && key(dest.segs)===srcParentKey && tries<6){ dest = pickUnusedDir(registry); tries++; }
+  if(!dest) dest = { segs: HOME_SEG.slice() };
+  const originalContent = getNode(f.segs).content;
+  const fname = f.segs[f.segs.length-1];
+  const destTargetSegs = dest.segs.concat([fname]);
+  const text = `Copy <code>${displayPathStr(f.segs)}</code> into the <code>${displayPathStr(dest.segs)}</code> directory. The original file must remain untouched in its current location, and an identical copy must appear in the new one.`;
+  return { text, optimalCommands:1, check: ()=>{
+    const orig = getNode(f.segs);
+    const copy = getNode(destTargetSegs);
+    return !!orig && orig.type==='file' && orig.content===originalContent && !!copy && copy.type==='file' && copy.content===originalContent;
+  }};
+}
+
+function genRename(registry){
+  const f = pickUnusedFile(registry);
+  if(!f) return null;
+  const originalContent = getNode(f.segs).content;
+  const oldName = f.segs[f.segs.length-1];
+  const parentSegs = f.segs.slice(0,-1);
+  const parentNode = getNode(parentSegs);
+  const dotIdx = oldName.lastIndexOf('.');
+  const ext = dotIdx>=0 ? oldName.slice(dotIdx) : '';
+  let newName, tries=0;
+  do{ newName = `renamed_${randInt(100,999)}${ext}`; tries++; } while(parentNode.children[newName] && tries<10);
+  const newSegs = parentSegs.concat([newName]);
+  const text = `Rename <code>${displayPathStr(f.segs)}</code> to <code>${newName}</code>. It must remain in the same directory.`;
+  return { text, optimalCommands:1, check: ()=>{
+    const oldNode = getNode(f.segs);
+    const newNode = getNode(newSegs);
+    return !oldNode && !!newNode && newNode.type==='file' && newNode.content===originalContent;
+  }};
+}
+
+function genMove(registry){
+  const f = pickUnusedFile(registry);
+  if(!f) return null;
+  const srcParentKey = key(f.segs.slice(0,-1));
+  let dest = pickUnusedDir(registry), tries=0;
+  while(dest && key(dest.segs)===srcParentKey && tries<6){ dest = pickUnusedDir(registry); tries++; }
+  if(!dest) dest = { segs: HOME_SEG.slice() };
+  const originalContent = getNode(f.segs).content;
+  const fname = f.segs[f.segs.length-1];
+  const destSegs = dest.segs.concat([fname]);
+  const text = `Move <code>${displayPathStr(f.segs)}</code> into the <code>${displayPathStr(dest.segs)}</code> directory. It must no longer exist at its original location afterward.`;
+  return { text, optimalCommands:1, check: ()=>{
+    const oldNode = getNode(f.segs);
+    const newNode = getNode(destSegs);
+    return !oldNode && !!newNode && newNode.type==='file' && newNode.content===originalContent;
+  }};
+}
+
+function genDelete(registry){
+  const d = pickUnusedDir(registry);
+  if(!d) return null;
+  const text = `Permanently delete the <code>${displayPathStr(d.segs)}</code> directory, including everything inside it.`;
+  return { text, optimalCommands:1, check: ()=>!getNode(d.segs) };
+}
+
+function genInspect(registry){
+  const cands = registry.files.filter(f=>!usedFileKeys.has(key(f.segs)));
+  if(!cands.length) return null;
+  const f = randChoice(cands); usedFileKeys.add(key(f.segs));
+  const content = getNode(f.segs).content;
+  const lastThree = content.split('\n').slice(-3).join('\n');
+  const outSegs = HOME_SEG.concat(['last_lines.txt']);
+  const text = `The file <code>${displayPathStr(f.segs)}</code> contains many lines. Extract exactly the last 3 lines of that file and save them into a new file named <code>last_lines.txt</code> inside your home directory (no other lines should be included).`;
+  return { text, optimalCommands:1, check: ()=>{
+    const out = getNode(outSegs);
+    if(!out || out.type!=='file') return false;
+    const norm = s => s.split('\n').map(l=>l.trim()).filter(l=>l.length).join('\n');
+    return norm(out.content) === norm(lastThree);
+  }};
+}
+
+function genHiddenCount(registry){
+  const home = getNode(HOME_SEG);
+  const count = Object.values(home.children).filter(c=>c.hidden).length;
+  const outSegs = HOME_SEG.concat(['hidden_count.txt']);
+  const text = `Determine how many hidden files or directories exist directly inside your home directory (not counting anything inside subdirectories). Then create a file named <code>hidden_count.txt</code> in your home directory containing only that number.`;
+  return { text, optimalCommands:2, check: ()=>{
+    const out = getNode(outSegs);
+    return !!out && out.type==='file' && out.content.trim()===String(count);
+  }};
+}
+
+function buildMissionList(registry){
+  usedDirKeys = new Set(); usedFileKeys = new Set();
+  const gens = [genMkdir, genTouch, genEdit, genCopy, genRename, genMove, genDelete, genInspect, genHiddenCount];
+  const list = [];
+  gens.forEach(g=>{ const m = g(registry); if(m) list.push(m); });
+  const base = Math.floor(100/list.length);
+  let remainder = 100 - base*list.length;
+  list.forEach((m,i)=>{ m.points = base + (i<remainder?1:0); m.completed=false; });
+  return list;
+}
+
+/* =========================================================
+   TERMINAL CORE
+========================================================= */
+const COMMANDS = ['pwd','ls','cd','tree','mkdir','rmdir','touch','cp','mv','rm','rename','cat','less','more','head','tail','nl','nano','vim','clear','history'];
 
 const el = {
   terminal: document.getElementById('terminal'),
   input: document.getElementById('cmd-input'),
   livePrompt: document.getElementById('live-prompt'),
-  lessonCmd: document.getElementById('lesson-cmd'),
-  lessonTitle: document.getElementById('lesson-title'),
-  lessonDesc: document.getElementById('lesson-desc'),
-  lessonWhy: document.getElementById('lesson-why'),
-  hintBtn: document.getElementById('hint-btn'),
-  hintText: document.getElementById('hint-text'),
-  completeBanner: document.getElementById('lesson-complete-banner'),
-  nextBtn: document.getElementById('next-btn'),
-  progressTrack: document.getElementById('progress-track'),
-  progressLabel: document.getElementById('progress-label'),
-  tree: document.getElementById('tree'),
-  scoreBadge: document.getElementById('score-badge'),
-  scorecard: document.getElementById('scorecard'),
-  retryBtn: document.getElementById('retry-btn')
+  objectivesList: document.getElementById('objectives-list'),
+  tasksChip: document.getElementById('tasks-chip'),
+  timerChip: document.getElementById('timer-chip'),
+  submitBtn: document.getElementById('submit-btn'),
+  startOverlay: document.getElementById('start-overlay'),
+  startBtn: document.getElementById('start-btn'),
+  resultsOverlay: document.getElementById('results-overlay'),
+  restartBtn: document.getElementById('restart-btn'),
+  scoreNum: document.getElementById('score-num'),
+  breakdown: document.getElementById('breakdown'),
+  resultsMissions: document.getElementById('results-missions'),
+  editorOverlay: document.getElementById('editor-overlay'),
+  editorTitlebar: document.getElementById('editor-titlebar'),
+  editorTextarea: document.getElementById('editor-textarea'),
+  editorHints: document.getElementById('editor-hints'),
+  editorSaveBtn: document.getElementById('editor-save-btn'),
+  editorDiscardBtn: document.getElementById('editor-discard-btn')
 };
 
-let history = [];
+let cmdHistory = [];
 let historyPtr = -1;
+let commandLog = [];
+let missions = [];
+let startTime = null;
+let timerInterval = null;
+let examState = 'not_started';
+let currentEditor = null;
+let submitArmed = false;
 
 function renderPrompt(){
   el.livePrompt.innerHTML =
-    '<span class="prompt-user">student@practice-box</span>' +
+    '<span class="prompt-user">student@examhost</span>' +
     '<span class="prompt-sep">:</span>' +
     '<span class="prompt-path">' + promptPathString() + '</span>' +
     '<span class="prompt-sep">$&nbsp;</span>';
@@ -428,290 +700,658 @@ function appendLine(html, cls){
 
 function appendPromptEcho(cmdText){
   appendLine(
-    '<span class="prompt-user">student@practice-box</span><span class="prompt-sep">:</span>' +
+    '<span class="prompt-user">student@examhost</span><span class="prompt-sep">:</span>' +
     '<span class="prompt-path">' + promptPathString() + '</span>' +
     '<span class="prompt-sep">$ </span>' + escapeHtml(cmdText)
   );
 }
 
-function escapeHtml(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function tokenize(str){
+  const tokens = []; let cur=''; let quote=null;
+  for(let i=0;i<str.length;i++){
+    const c = str[i];
+    if(quote){ if(c===quote){ quote=null; } else cur+=c; }
+    else if(c==='"' || c==="'"){ quote=c; }
+    else if(c===' '){ if(cur.length){ tokens.push(cur); cur=''; } }
+    else cur+=c;
+  }
+  if(cur.length) tokens.push(cur);
+  return tokens;
 }
 
-/* ---------------- Command execution ---------------- */
-function runCommand(raw){
-  const input = raw;
-  appendPromptEcho(input);
-  const trimmed = input.trim();
+function recordCmd(text, ok){ commandLog.push({ cmd:text, ok }); }
 
-  if(trimmed === ""){ renderTree(); return; }
+/* ---------- individual commands ---------- */
+function cmdPwd(){ return { ok:true, lines:[absPathStr(cwd)] }; }
 
-  if(trimmed === "clear"){
-    el.terminal.innerHTML = "";
-    checkLesson(trimmed);
-    return;
-  }
-
-  if(trimmed === "help"){
-    appendLine("Commands available in this sandbox: pwd, ls, ls -a, cd &lt;folder&gt;, cd .., cd ~, clear, help", "out-system");
-    checkLesson(trimmed);
-    return;
-  }
-
-  if(trimmed === "pwd"){
-    const abs = cwdPath.length === 1 ? "/home/student" : "/home/student/" + cwdPath.slice(1).join("/");
-    appendLine(abs);
-    checkLesson(trimmed);
-    renderTree();
-    return;
-  }
-
-  if(trimmed === "ls" || trimmed === "ls -a" || trimmed === "ls -la" || trimmed === "ls -al"){
-    const node = resolveNode(cwdPath);
-    const showHidden = trimmed !== "ls";
-    const entries = Object.values(node.children)
-      .filter(c => showHidden || !c.hidden)
-      .sort((a,b) => a.name.localeCompare(b.name));
-    if(entries.length === 0){
-      appendLine("(empty directory)", "out-system");
-    } else {
-      const parts = entries.map(c => {
-        const cls = c.type === 'dir' ? 'out-dir' : (c.hidden ? 'out-hidden' : '');
-        const label = c.type === 'dir' ? c.name + '/' : c.name;
-        return '<span class="'+cls+'">' + label + '</span>';
-      });
-      appendLine(parts.join('  '));
-    }
-    checkLesson(trimmed);
-    renderTree();
-    return;
-  }
-
-  if(trimmed === "cd .." ){
-    if(cwdPath.length === 1){
-      appendLine("Already at the top of this sandbox (/home/student) — nowhere further up to go.", "out-system");
-    } else {
-      cwdPath.pop();
-    }
-    checkLesson(trimmed);
-    renderTree();
-    return;
-  }
-
-  if(trimmed === "cd" || trimmed === "cd ~" || trimmed === "cd /home/student"){
-    cwdPath = ["student"];
-    checkLesson(trimmed);
-    renderTree();
-    return;
-  }
-
-  if(trimmed.startsWith("cd ")){
-    const target = trimmed.slice(3).trim();
-    const node = resolveNode(cwdPath);
-    const child = node.children[target];
-    if(!child){
-      appendLine("cd: no such file or directory: " + target, "out-error");
-    } else if(child.type !== "dir"){
-      appendLine("cd: not a directory: " + target, "out-error");
-    } else {
-      cwdPath.push(target);
-    }
-    checkLesson(trimmed);
-    renderTree();
-    return;
-  }
-
-  appendLine("command not found: " + trimmed.split(" ")[0] + "  (try: pwd, ls, ls -a, cd, cd ..)", "out-error");
-  checkLesson(trimmed);
-  renderTree();
+function cmdLs(args){
+  const showHidden = hasFlag(args,'a');
+  const positional = args.filter(a=>!a.startsWith('-'));
+  const target = positional[0] || '.';
+  const segs = resolvePath(target);
+  const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`ls: cannot access '${target}': No such file or directory`] };
+  if(node.type==='file') return { ok:true, lines:[node.name], plain:[node.name] };
+  const entries = Object.values(node.children).filter(c=>showHidden || !c.hidden).sort((a,b)=>a.name.localeCompare(b.name));
+  const plain = entries.map(c=> c.type==='dir' ? c.name+'/' : c.name);
+  if(!entries.length) return { ok:true, lines:[''], plain:[] };
+  const htmlLine = entries.map(c=>{
+    const cls = c.type==='dir' ? 'out-dir' : (c.hidden ? 'out-hidden' : '');
+    const label = c.type==='dir' ? c.name+'/' : c.name;
+    return `<span class="${cls}">${escapeHtml(label)}</span>`;
+  }).join('  ');
+  return { ok:true, lines:[htmlLine], html:true, plain };
 }
 
-/* ---------------- Lesson logic ---------------- */
-function loadLesson(i){
-  const L = lessons[i];
-  el.lessonCmd.textContent = L.cmd;
-  el.lessonTitle.textContent = L.title;
-  el.lessonDesc.innerHTML = L.desc;
-  el.lessonWhy.innerHTML = L.why;
-  el.hintText.style.display = "none";
-  el.hintText.innerHTML = L.hint;
-  el.completeBanner.style.display = "none";
-  el.nextBtn.style.display = "none";
-  lessonDone = false;
-  lessonAttempts = 0;
-  lessonHintUsed = false;
-  renderProgress();
+function cmdCd(args){
+  const target = args[0] || '~';
+  const segs = resolvePath(target);
+  const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`bash: cd: ${target}: No such file or directory`] };
+  if(node.type!=='dir') return { ok:false, lines:[`bash: cd: ${target}: Not a directory`] };
+  cwd = segs;
+  return { ok:true, lines:[] };
 }
 
-function renderProgress(){
-  el.progressTrack.innerHTML = "";
-  lessons.forEach((l, i) => {
-    const d = document.createElement('div');
-    d.className = 'dot' + (i < currentLesson ? ' done' : (i === currentLesson ? ' active' : ''));
-    el.progressTrack.appendChild(d);
-  });
-  if(currentLesson < lessons.length){
-    el.progressLabel.textContent = "Lesson " + (currentLesson+1) + " of " + lessons.length;
+function cmdTree(args){
+  const showHidden = hasFlag(args,'a');
+  const positional = args.filter(a=>!a.startsWith('-'));
+  const target = positional[0] || '.';
+  const segs = resolvePath(target);
+  const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`tree: ${target}: No such file or directory`] };
+  if(node.type!=='dir') return { ok:false, lines:[`tree: ${target}: not a directory`] };
+  const linesHtml = [`<span class="out-dir">${escapeHtml(target==='.'?'.':target)}</span>`];
+  const linesPlain = [target==='.'?'.':target];
+  const counts = { dirs:0, files:0 };
+  (function walk(n, prefix){
+    const entries = Object.values(n.children).filter(c=>showHidden || !c.hidden).sort((a,b)=>{
+      if(a.type!==b.type) return a.type==='dir' ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    entries.forEach((c,i)=>{
+      const isLast = i===entries.length-1;
+      const connector = isLast ? '└── ' : '├── ';
+      const cls = c.type==='dir' ? 'out-dir' : (c.hidden ? 'out-hidden' : '');
+      const label = c.type==='dir' ? c.name+'/' : c.name;
+      linesHtml.push(prefix+connector+`<span class="${cls}">${escapeHtml(label)}</span>`);
+      linesPlain.push(prefix+connector+label);
+      if(c.type==='dir'){ counts.dirs++; walk(c, prefix+(isLast?'    ':'│   ')); }
+      else counts.files++;
+    });
+  })(node, '');
+  linesHtml.push(''); linesHtml.push(`${counts.dirs} directories, ${counts.files} files`);
+  linesPlain.push(''); linesPlain.push(`${counts.dirs} directories, ${counts.files} files`);
+  return { ok:true, lines:linesHtml, html:true, plain:linesPlain };
+}
+
+function cmdMkdir(args){
+  const pFlag = hasFlag(args,'p');
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['mkdir: missing operand'] };
+  for(const p of positional){
+    const segs = resolvePath(p);
+    if(pFlag){
+      let cur = ROOT, ok=true, errMsg=null;
+      for(const seg of segs){
+        if(!cur.children[seg]){ cur.children[seg] = { type:'dir', name:seg, hidden:seg.startsWith('.'), children:{} }; }
+        else if(cur.children[seg].type!=='dir'){ errMsg = `mkdir: cannot create directory '${p}': Not a directory`; ok=false; break; }
+        cur = cur.children[seg];
+      }
+      if(!ok) return { ok:false, lines:[errMsg] };
+    } else {
+      const name = segs[segs.length-1];
+      const parentNode = getNode(segs.slice(0,-1));
+      if(!parentNode || parentNode.type!=='dir') return { ok:false, lines:[`mkdir: cannot create directory '${p}': No such file or directory`] };
+      if(parentNode.children[name]) return { ok:false, lines:[`mkdir: cannot create directory '${p}': File exists`] };
+      parentNode.children[name] = { type:'dir', name, hidden:name.startsWith('.'), children:{} };
+    }
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdRmdir(args){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['rmdir: missing operand'] };
+  for(const p of positional){
+    const segs = resolvePath(p); const node = getNode(segs);
+    if(!node) return { ok:false, lines:[`rmdir: failed to remove '${p}': No such file or directory`] };
+    if(node.type!=='dir') return { ok:false, lines:[`rmdir: failed to remove '${p}': Not a directory`] };
+    if(Object.keys(node.children).length) return { ok:false, lines:[`rmdir: failed to remove '${p}': Directory not empty`] };
+    const parent = getNode(segs.slice(0,-1));
+    delete parent.children[node.name];
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdTouch(args){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['touch: missing file operand'] };
+  for(const p of positional){
+    const segs = resolvePath(p); const name = segs[segs.length-1];
+    const parent = getNode(segs.slice(0,-1));
+    if(!parent || parent.type!=='dir') return { ok:false, lines:[`touch: cannot touch '${p}': No such file or directory`] };
+    if(!parent.children[name]) parent.children[name] = { type:'file', name, hidden:name.startsWith('.'), content:'' };
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdCp(args){
+  const recursive = hasFlag(args,'r') || hasFlag(args,'R');
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(positional.length<2) return { ok:false, lines:['cp: missing destination file operand'] };
+  const dest = positional[positional.length-1];
+  const sources = positional.slice(0,-1);
+  const destSegs = resolvePath(dest);
+  const destNode = getNode(destSegs);
+  const destIsDir = destNode && destNode.type==='dir';
+  if(sources.length>1 && !destIsDir) return { ok:false, lines:[`cp: target '${dest}' is not a directory`] };
+  for(const s of sources){
+    const srcSegs = resolvePath(s); const srcNode = getNode(srcSegs);
+    if(!srcNode) return { ok:false, lines:[`cp: cannot stat '${s}': No such file or directory`] };
+    if(srcNode.type==='dir' && !recursive) return { ok:false, lines:[`cp: -r not specified; omitting directory '${s}'`] };
+    let finalParentSegs, finalName;
+    if(destIsDir){ finalParentSegs = destSegs; finalName = srcNode.name; }
+    else { finalParentSegs = destSegs.slice(0,-1); finalName = destSegs[destSegs.length-1]; }
+    const finalParent = getNode(finalParentSegs);
+    if(!finalParent || finalParent.type!=='dir') return { ok:false, lines:[`cp: cannot create '${dest}': No such file or directory`] };
+    finalParent.children[finalName] = cloneNode(srcNode, finalName);
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdMv(args){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(positional.length<2) return { ok:false, lines:['mv: missing destination file operand'] };
+  const dest = positional[positional.length-1];
+  const sources = positional.slice(0,-1);
+  const destSegs = resolvePath(dest);
+  const destNode = getNode(destSegs);
+  const destIsDir = destNode && destNode.type==='dir';
+  if(sources.length>1 && !destIsDir) return { ok:false, lines:[`mv: target '${dest}' is not a directory`] };
+  for(const s of sources){
+    const srcSegs = resolvePath(s); const srcNode = getNode(srcSegs);
+    if(!srcNode) return { ok:false, lines:[`mv: cannot stat '${s}': No such file or directory`] };
+    const srcParent = getNode(srcSegs.slice(0,-1));
+    let finalParentSegs, finalName;
+    if(destIsDir){ finalParentSegs = destSegs; finalName = srcNode.name; }
+    else { finalParentSegs = destSegs.slice(0,-1); finalName = destSegs[destSegs.length-1]; }
+    const finalParent = getNode(finalParentSegs);
+    if(!finalParent || finalParent.type!=='dir') return { ok:false, lines:[`mv: cannot move '${s}' to '${dest}': No such file or directory`] };
+    delete srcParent.children[srcSegs[srcSegs.length-1]];
+    srcNode.name = finalName; srcNode.hidden = finalName.startsWith('.');
+    finalParent.children[finalName] = srcNode;
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdRm(args){
+  const recursive = hasFlag(args,'r') || hasFlag(args,'R');
+  const force = hasFlag(args,'f');
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['rm: missing operand'] };
+  for(const p of positional){
+    const segs = resolvePath(p); const node = getNode(segs);
+    if(!node){ if(force) continue; return { ok:false, lines:[`rm: cannot remove '${p}': No such file or directory`] }; }
+    if(node.type==='dir' && !recursive) return { ok:false, lines:[`rm: cannot remove '${p}': Is a directory`] };
+    const parent = getNode(segs.slice(0,-1));
+    delete parent.children[node.name];
+  }
+  return { ok:true, lines:[] };
+}
+
+function cmdRename(args){
+  if(args.length<2) return { ok:false, lines:['rename: missing operand'] };
+  const first = args[0];
+  const m = first.match(/^s\/(.*)\/(.*)\/(g)?$/);
+  if(m){
+    const search=m[1], replace=m[2], global=!!m[3];
+    const files = args.slice(1);
+    for(const f of files){
+      const segs = resolvePath(f); const node = getNode(segs);
+      if(!node) return { ok:false, lines:[`rename: cannot rename '${f}': No such file or directory`] };
+      const parent = getNode(segs.slice(0,-1));
+      const newName = global ? node.name.split(search).join(replace) : node.name.replace(search, replace);
+      if(newName===node.name) continue;
+      if(parent.children[newName]) return { ok:false, lines:[`rename: cannot rename '${f}' to '${newName}': File exists`] };
+      delete parent.children[node.name];
+      node.name = newName; node.hidden = newName.startsWith('.');
+      parent.children[newName] = node;
+    }
+    return { ok:true, lines:[] };
+  } else if(args.length===2){
+    const [oldp, newNameArg] = args;
+    const segs = resolvePath(oldp); const node = getNode(segs);
+    if(!node) return { ok:false, lines:[`rename: cannot rename '${oldp}': No such file or directory`] };
+    const parent = getNode(segs.slice(0,-1));
+    const newName = newNameArg.includes('/') ? resolvePath(newNameArg).pop() : newNameArg;
+    if(parent.children[newName]) return { ok:false, lines:[`rename: cannot rename '${oldp}' to '${newName}': File exists`] };
+    delete parent.children[node.name];
+    node.name = newName; node.hidden = newName.startsWith('.');
+    parent.children[newName] = node;
+    return { ok:true, lines:[] };
+  }
+  return { ok:false, lines:['rename: invalid arguments'] };
+}
+
+function cmdCat(args){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['cat: missing operand'] };
+  let out = [];
+  for(const a of positional){
+    const segs = resolvePath(a); const node = getNode(segs);
+    if(!node) return { ok:false, lines:[`cat: ${a}: No such file or directory`] };
+    if(node.type==='dir') return { ok:false, lines:[`cat: ${a}: Is a directory`] };
+    out = out.concat(node.content.split('\n'));
+  }
+  return { ok:true, lines:out, plain:out };
+}
+
+function cmdPager(args, kind){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:[`${kind}: missing operand`] };
+  const a = positional[0];
+  const segs = resolvePath(a); const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`${kind}: cannot open ${a}: No such file or directory`] };
+  if(node.type==='dir') return { ok:false, lines:[`${kind}: ${a}: Is a directory`] };
+  const lines = node.content.split('\n');
+  const out = [`==> ${a} <==`].concat(lines).concat(['(END)']);
+  return { ok:true, lines:out, plain:lines };
+}
+
+function parseN(args, def){
+  let n = def; const positional = [];
+  for(let i=0;i<args.length;i++){
+    if(args[i]==='-n'){ n = parseInt(args[i+1],10) || def; i++; }
+    else if(/^-n\d+$/.test(args[i])){ n = parseInt(args[i].slice(2),10) || def; }
+    else if(/^-\d+$/.test(args[i])){ n = parseInt(args[i].slice(1),10) || def; }
+    else positional.push(args[i]);
+  }
+  return { n, positional };
+}
+
+function cmdHead(args){
+  const { n, positional } = parseN(args,10);
+  if(!positional.length) return { ok:false, lines:['head: missing operand'] };
+  const segs = resolvePath(positional[0]); const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`head: cannot open '${positional[0]}' for reading: No such file or directory`] };
+  if(node.type==='dir') return { ok:false, lines:[`head: error reading '${positional[0]}': Is a directory`] };
+  const lines = node.content.split('\n');
+  const out = lines.slice(0, n);
+  return { ok:true, lines:out, plain:out };
+}
+
+function cmdTail(args){
+  const { n, positional } = parseN(args,10);
+  if(!positional.length) return { ok:false, lines:['tail: missing operand'] };
+  const segs = resolvePath(positional[0]); const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`tail: cannot open '${positional[0]}' for reading: No such file or directory`] };
+  if(node.type==='dir') return { ok:false, lines:[`tail: error reading '${positional[0]}': Is a directory`] };
+  const lines = node.content.split('\n');
+  const out = n>=lines.length ? lines : lines.slice(-n);
+  return { ok:true, lines:out, plain:out };
+}
+
+function cmdNl(args){
+  const positional = args.filter(a=>!a.startsWith('-'));
+  if(!positional.length) return { ok:false, lines:['nl: missing operand'] };
+  const segs = resolvePath(positional[0]); const node = getNode(segs);
+  if(!node) return { ok:false, lines:[`nl: ${positional[0]}: No such file or directory`] };
+  if(node.type==='dir') return { ok:false, lines:[`nl: ${positional[0]}: Is a directory`] };
+  const lines = node.content.split('\n');
+  const out = lines.map((l,i)=> String(i+1).padStart(6,' ')+'\t'+l);
+  const plain = lines.map((l,i)=> String(i+1).padStart(6,' ')+'\t'+l);
+  return { ok:true, lines:out, plain };
+}
+
+function writeRedirect(target, plainLines, append){
+  const segs = resolvePath(target); const name = segs[segs.length-1];
+  const parent = getNode(segs.slice(0,-1));
+  if(!parent || parent.type!=='dir'){ appendLine(escapeHtml(`bash: ${target}: No such file or directory`), 'out-error'); return; }
+  const existing = parent.children[name];
+  if(existing && existing.type==='dir'){ appendLine(escapeHtml(`bash: ${target}: Is a directory`), 'out-error'); return; }
+  const newContent = (append && existing) ? existing.content + '\n' + plainLines.join('\n') : plainLines.join('\n');
+  parent.children[name] = { type:'file', name, hidden:name.startsWith('.'), content:newContent };
+}
+
+/* ---------- dispatcher ---------- */
+function execute(raw){
+  appendPromptEcho(raw);
+  const work = raw.trim();
+  if(work===''){ renderPrompt(); return; }
+
+  cmdHistory.push(work); historyPtr = cmdHistory.length;
+
+  let tokens = tokenize(work);
+  let redirect=null, append=false;
+  const gtgtIdx = tokens.indexOf('>>');
+  const gtIdx = tokens.indexOf('>');
+  let idx=-1;
+  if(gtgtIdx>=0){ idx=gtgtIdx; append=true; } else if(gtIdx>=0){ idx=gtIdx; append=false; }
+  if(idx>=0){ redirect = tokens[idx+1]; tokens = tokens.slice(0,idx).concat(tokens.slice(idx+2)); }
+
+  if(!tokens.length){ appendLine('bash: syntax error near unexpected token `newline\'', 'out-error'); recordCmd(work,false); refreshMissions(); renderPrompt(); return; }
+
+  const cmd = tokens[0], args = tokens.slice(1);
+
+  if(cmd==='nano' || cmd==='vim'){ openEditor(args, cmd); return; }
+  if(cmd==='clear'){ el.terminal.innerHTML=''; renderPrompt(); return; }
+  if(cmd==='help'){ appendLine('Help is disabled during the examination.', 'out-system'); recordCmd(work,true); renderPrompt(); return; }
+
+  let result;
+  switch(cmd){
+    case 'pwd': result = cmdPwd(); break;
+    case 'ls': result = cmdLs(args); break;
+    case 'cd': result = cmdCd(args); break;
+    case 'tree': result = cmdTree(args); break;
+    case 'mkdir': result = cmdMkdir(args); break;
+    case 'rmdir': result = cmdRmdir(args); break;
+    case 'touch': result = cmdTouch(args); break;
+    case 'cp': result = cmdCp(args); break;
+    case 'mv': result = cmdMv(args); break;
+    case 'rm': result = cmdRm(args); break;
+    case 'rename': result = cmdRename(args); break;
+    case 'cat': result = cmdCat(args); break;
+    case 'less': result = cmdPager(args,'less'); break;
+    case 'more': result = cmdPager(args,'more'); break;
+    case 'head': result = cmdHead(args); break;
+    case 'tail': result = cmdTail(args); break;
+    case 'nl': result = cmdNl(args); break;
+    case 'history': result = { ok:true, lines: cmdHistory.map((h,i)=>`  ${i+1}  ${h}`) }; break;
+    default: result = { ok:false, lines:[`bash: ${cmd}: command not found`] };
+  }
+
+  const redirectable = ['cat','head','tail','nl','ls','tree','pwd','history'];
+  if(redirect){
+    if(!result.ok){
+      result.lines.forEach(l=>appendLine(escapeHtml(l),'out-error'));
+      recordCmd(work,false);
+    } else if(redirectable.includes(cmd)){
+      writeRedirect(redirect, result.plain || result.lines, append);
+      recordCmd(work,true);
+    } else {
+      appendLine(`bash: syntax error near unexpected token '&gt;'`, 'out-error');
+      recordCmd(work,false);
+    }
   } else {
-    el.progressLabel.textContent = "All lessons complete — free practice mode";
-  }
-}
-
-function updateScoreBadge(){
-  el.scoreBadge.textContent = "Score: " + score + " / " + MAX_SCORE;
-  el.scoreBadge.classList.add('bump');
-  setTimeout(() => el.scoreBadge.classList.remove('bump'), 200);
-}
-
-function checkLesson(inputTrimmed){
-  if(currentLesson >= lessons.length || lessonDone) return;
-  const L = lessons[currentLesson];
-  const isMeta = inputTrimmed === "" || inputTrimmed === "help" || inputTrimmed === "clear";
-
-  if(L.check(inputTrimmed)){
-    lessonDone = true;
-    const deduction = (lessonAttempts * 3) + (lessonHintUsed ? 5 : 0);
-    const points = Math.max(5, MAX_PER_LESSON - deduction);
-    score += points;
-    results.push({ cmd: L.cmd, points: points, attempts: lessonAttempts, hintUsed: lessonHintUsed });
-    updateScoreBadge();
-
-    el.completeBanner.style.display = "block";
-    el.completeBanner.innerHTML = "✓ Nailed it. That's <b>" + L.cmd + "</b>." +
-      "<span class='points-chip'>+" + points + " pts</span>";
-    el.nextBtn.style.display = (currentLesson < lessons.length - 1) ? "inline-block" : "none";
-
-    if(currentLesson === lessons.length - 1){
-      el.completeBanner.innerHTML += "<br><br>🎉 You've covered pwd, ls, ls -a, cd, and cd .. — the five commands you'll type most, every single day. Scroll down and keep practicing freely below; nothing here is locked anymore.";
-      currentLesson = lessons.length; // move into free mode
-      renderProgress();
-      renderScorecard();
+    if(result.lines && result.lines.length){
+      result.lines.forEach(l=> appendLine(result.html ? l : escapeHtml(l), result.ok ? '' : 'out-error'));
     }
-  } else if(!isMeta){
-    lessonAttempts++;
+    recordCmd(work, result.ok);
   }
-}
 
-function renderScorecard(){
-  el.scorecard.style.display = "block";
-  el.scorecard.innerHTML = "";
-  results.forEach(r => {
-    const row = document.createElement('div');
-    row.className = 'sc-row';
-    const attemptNote = r.attempts > 0 ? (r.attempts + (r.attempts === 1 ? " retry" : " retries")) : "first try";
-    const hintNote = r.hintUsed ? ", hint used" : "";
-    row.innerHTML =
-      '<div><span class="sc-cmd">' + r.cmd + '</span><span class="sc-meta">' + attemptNote + hintNote + '</span></div>' +
-      '<div class="sc-pts">+' + r.points + '</div>';
-    el.scorecard.appendChild(row);
-  });
-  const total = document.createElement('div');
-  total.className = 'sc-row total';
-  const pct = Math.round((score / MAX_SCORE) * 100);
-  let verdict = "Keep practicing";
-  if(pct === 100) verdict = "Perfect score";
-  else if(pct >= 85) verdict = "Excellent";
-  else if(pct >= 70) verdict = "Solid work";
-  else if(pct >= 50) verdict = "Passed";
-  total.innerHTML = '<div>Total — ' + verdict + '</div><div>' + score + ' / ' + MAX_SCORE + '</div>';
-  el.scorecard.appendChild(total);
-  el.retryBtn.style.display = "inline-block";
-}
-
-function resetAssignment(){
-  currentLesson = 0;
-  score = 0;
-  results.length = 0;
-  el.scorecard.style.display = "none";
-  el.retryBtn.style.display = "none";
-  updateScoreBadge();
-  loadLesson(0);
-}
-el.retryBtn.addEventListener('click', resetAssignment);
-
-el.nextBtn.addEventListener('click', () => {
-  currentLesson++;
-  loadLesson(currentLesson);
-});
-
-el.hintBtn.addEventListener('click', () => {
-  el.hintText.style.display = el.hintText.style.display === "none" ? "block" : "none";
-  lessonHintUsed = true;
-});
-
-/* ---------------- Tree rendering ---------------- */
-function renderTree(){
-  el.tree.innerHTML = "";
-  function walk(node, path, depth){
-    Object.values(node.children)
-      .sort((a,b) => {
-        if(a.type !== b.type) return a.type === 'dir' ? -1 : 1;
-        return a.name.localeCompare(b.name);
-      })
-      .forEach(child => {
-        const childPath = path.concat(child.name);
-        const isCurrent = childPath.length === cwdPath.length &&
-          childPath.every((seg,i) => seg === cwdPath[i]);
-        const line = document.createElement('div');
-        let cls = 'tree-line';
-        if(child.type === 'dir') cls += ' is-dir';
-        else cls += ' is-file';
-        if(child.hidden) cls += ' is-hidden';
-        if(isCurrent) cls += ' current';
-        line.className = cls;
-        const indent = '&nbsp;&nbsp;'.repeat(depth);
-        const glyph = child.type === 'dir' ? '📁' : '📄';
-        line.innerHTML = '<span class="tglyph">' + indent + (depth>0?'└─ ':'') + '</span>' +
-          glyph + ' ' + child.name + (child.type==='dir' ? '/' : '') + (isCurrent ? '  ←' : '');
-        el.tree.appendChild(line);
-        if(child.type === 'dir'){
-          walk(child, childPath, depth+1);
-        }
-      });
-  }
-  const rootLine = document.createElement('div');
-  const rootIsCurrent = cwdPath.length === 1;
-  rootLine.className = 'tree-line is-dir' + (rootIsCurrent ? ' current' : '');
-  rootLine.innerHTML = '📁 student/' + (rootIsCurrent ? '  ←' : '');
-  el.tree.appendChild(rootLine);
-  walk(fs, ["student"], 1);
-}
-
-/* ---------------- Input handling ---------------- */
-el.input.addEventListener('keydown', (e) => {
-  if(e.key === 'Enter'){
-    const val = el.input.value;
-    if(val.trim() !== ""){
-      history.push(val);
-      historyPtr = history.length;
-    }
-    el.input.value = "";
-    runCommand(val);
-    renderPrompt();
-  } else if(e.key === 'ArrowUp'){
-    e.preventDefault();
-    if(historyPtr > 0){ historyPtr--; el.input.value = history[historyPtr]; }
-  } else if(e.key === 'ArrowDown'){
-    e.preventDefault();
-    if(historyPtr < history.length - 1){ historyPtr++; el.input.value = history[historyPtr]; }
-    else { historyPtr = history.length; el.input.value = ""; }
-  }
-});
-
-document.getElementById('terminal').addEventListener('click', () => el.input.focus());
-document.body.addEventListener('click', (e) => {
-  if(e.target.closest('.term-panel')) el.input.focus();
-});
-
-/* ---------------- Boot ---------------- */
-function boot(){
+  refreshMissions();
   renderPrompt();
-  renderTree();
-  el.scoreBadge.textContent = "Score: 0 / " + MAX_SCORE;
-  loadLesson(0);
-  appendLine("Welcome. This is a practice Linux filesystem — nothing here is real, so there's nothing to break.", "out-system");
-  appendLine("Follow the lesson on the left, or type <b>help</b> any time.", "out-system");
+}
+
+/* =========================================================
+   SIMULATED EDITORS (nano / vim)
+========================================================= */
+function openEditor(args, kind){
+  if(!args.length){ appendLine(escapeHtml(`bash: ${kind}: missing file operand`), 'out-error'); recordCmd(kind,false); refreshMissions(); renderPrompt(); return; }
+  const target = args[args.length-1];
+  const segs = resolvePath(target);
+  const parentSegs = segs.slice(0,-1);
+  const parentNode = getNode(parentSegs);
+  const name = segs[segs.length-1];
+  if(!parentNode || parentNode.type!=='dir'){
+    appendLine(escapeHtml(`bash: ${kind}: ${target}: No such file or directory`), 'out-error');
+    recordCmd(kind+' '+args.join(' '), false);
+    refreshMissions(); renderPrompt();
+    return;
+  }
+  const existing = parentNode.children[name];
+  if(existing && existing.type==='dir'){
+    appendLine(escapeHtml(`${kind}: ${target}: Is a directory`), 'out-error');
+    recordCmd(kind+' '+args.join(' '), false);
+    refreshMissions(); renderPrompt();
+    return;
+  }
+  recordCmd(kind+' '+args.join(' '), true);
+  currentEditor = { segs, parentNode, name, kind };
+  el.editorTextarea.value = existing ? existing.content : '';
+  el.editorTitlebar.textContent = kind==='nano'
+    ? `GNU nano 7.2   File: ${displayPathStr(segs)}${existing?'':'  (New File)'}`
+    : `"${displayPathStr(segs)}" ${existing? existing.content.split('\n').length+'L' : '[New File]'}`;
+  el.editorHints.textContent = kind==='nano'
+    ? '^O Write Out    ^X Exit    (or use the buttons)'
+    : ':wq to save & quit    :q! to discard    (or use the buttons)';
+  el.editorOverlay.style.display = 'flex';
+  el.input.disabled = true;
+  el.editorTextarea.focus();
+}
+
+function saveEditor(){
+  if(!currentEditor) return;
+  const content = el.editorTextarea.value;
+  const { parentNode, name, segs } = currentEditor;
+  if(parentNode.children[name] && parentNode.children[name].type==='file'){
+    parentNode.children[name].content = content;
+  } else {
+    parentNode.children[name] = { type:'file', name, hidden:name.startsWith('.'), content };
+  }
+  const lineCount = content.length ? content.split('\n').length : 0;
+  closeEditor();
+  appendLine(escapeHtml(`[ Wrote ${lineCount} lines to ${displayPathStr(segs)} ]`), 'out-success');
+  refreshMissions();
+  renderPrompt();
+}
+
+function discardEditor(){
+  closeEditor();
+  renderPrompt();
+}
+
+function closeEditor(){
+  el.editorOverlay.style.display = 'none';
+  el.input.disabled = false;
+  currentEditor = null;
   el.input.focus();
+}
+
+el.editorSaveBtn.addEventListener('click', saveEditor);
+el.editorDiscardBtn.addEventListener('click', discardEditor);
+el.editorTextarea.addEventListener('keydown', (e)=>{
+  if((e.ctrlKey || e.metaKey) && (e.key==='o' || e.key==='s' || e.key==='x')){ e.preventDefault(); saveEditor(); }
+});
+
+/* =========================================================
+   MISSIONS / OBJECTIVES UI
+========================================================= */
+function refreshMissions(){
+  missions.forEach(m=>{ try{ m.completed = !!m.check(); }catch(e){ m.completed=false; } });
+  renderObjectives();
+  const done = missions.filter(m=>m.completed).length;
+  el.tasksChip.textContent = `Tasks: ${done}/${missions.length}`;
+}
+
+function renderObjectives(){
+  el.objectivesList.innerHTML = '';
+  missions.forEach((m,i)=>{
+    const row = document.createElement('div');
+    row.className = 'obj-row' + (m.completed ? ' obj-done' : '');
+    row.innerHTML = `<div class="obj-num">${m.completed ? '✓' : (i+1)}</div><div class="obj-text">${m.text}</div>`;
+    el.objectivesList.appendChild(row);
+  });
+}
+
+/* =========================================================
+   TIMER
+========================================================= */
+function updateTimerDisplay(){
+  const elapsed = Date.now() - startTime;
+  const totalSec = Math.floor(elapsed/1000);
+  el.timerChip.textContent = pad(Math.floor(totalSec/60)) + ':' + pad(totalSec%60);
+}
+
+/* =========================================================
+   TAB COMPLETION + INPUT HANDLING
+========================================================= */
+function tabComplete(){
+  const val = el.input.value;
+  const parts = val.split(' ');
+  const last = parts[parts.length-1];
+  let matches = [];
+  if(parts.length===1){
+    matches = COMMANDS.filter(c=>c.startsWith(last));
+  } else {
+    const slashIdx = last.lastIndexOf('/');
+    const dirPart = slashIdx>=0 ? last.slice(0,slashIdx+1) : '';
+    const prefix = slashIdx>=0 ? last.slice(slashIdx+1) : last;
+    const dirSegs = resolvePath(dirPart || '.');
+    const dirNode = getNode(dirSegs);
+    if(dirNode && dirNode.type==='dir'){
+      matches = Object.values(dirNode.children).filter(c=>c.name.startsWith(prefix)).map(c=>c.name+(c.type==='dir'?'/':''));
+    }
+  }
+  if(matches.length===1){
+    if(parts.length===1){ parts[parts.length-1] = matches[0]; }
+    else {
+      const slashIdx = last.lastIndexOf('/');
+      const dirPart = slashIdx>=0 ? last.slice(0,slashIdx+1) : '';
+      parts[parts.length-1] = dirPart + matches[0];
+    }
+    el.input.value = parts.join(' ');
+  } else if(matches.length>1){
+    appendPromptEcho(val);
+    appendLine(escapeHtml(matches.join('   ')), 'out-system');
+    renderPrompt();
+  }
+}
+
+el.input.addEventListener('keydown', (e)=>{
+  if(el.input.disabled) return;
+  if(e.key==='Enter'){
+    const val = el.input.value;
+    el.input.value = '';
+    execute(val);
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(historyPtr>0){ historyPtr--; el.input.value = cmdHistory[historyPtr]; }
+  } else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(historyPtr < cmdHistory.length-1){ historyPtr++; el.input.value = cmdHistory[historyPtr]; }
+    else { historyPtr = cmdHistory.length; el.input.value = ''; }
+  } else if(e.key==='Tab'){
+    e.preventDefault();
+    tabComplete();
+  }
+});
+
+document.getElementById('terminal').addEventListener('click', ()=>{ if(!el.input.disabled) el.input.focus(); });
+document.body.addEventListener('click', (e)=>{
+  if(e.target.closest('.term-panel') && !el.input.disabled) el.input.focus();
+});
+
+/* =========================================================
+   EXAM LIFECYCLE
+========================================================= */
+function startExam(){
+  const registry = buildFS();
+  missions = buildMissionList(registry);
+  cmdHistory = []; historyPtr = -1; commandLog = [];
+  startTime = Date.now();
+  examState = 'in_progress';
+  submitArmed = false;
+
+  el.startOverlay.style.display = 'none';
+  el.resultsOverlay.style.display = 'none';
+  el.terminal.innerHTML = '';
+  appendLine('Linux Practical Examination — session initialized.', 'out-system');
+  appendLine('Review the objectives on the left. Use the terminal to complete each task.', 'out-system');
+  renderObjectives();
+  el.tasksChip.textContent = `Tasks: 0/${missions.length}`;
+  renderPrompt();
+  el.input.disabled = false;
+  el.input.value = '';
+  el.input.focus();
+  el.submitBtn.disabled = false;
+  el.submitBtn.textContent = 'Submit Exam';
+  el.submitBtn.classList.remove('armed');
+
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimerDisplay, 1000);
+  updateTimerDisplay();
+  refreshMissions();
+}
+
+function submitExam(){
+  if(examState!=='in_progress') return;
+  clearInterval(timerInterval);
+  examState = 'submitted';
+  el.input.disabled = true;
+  el.submitBtn.disabled = true;
+
+  const elapsedMs = Date.now() - startTime;
+  const elapsedMin = elapsedMs / 60000;
+  missions.forEach(m=>{ try{ m.completed = !!m.check(); }catch(e){ m.completed=false; } });
+  const completedList = missions.filter(m=>m.completed);
+  const taskPoints = completedList.reduce((s,m)=>s+m.points,0);
+  const totalCommands = commandLog.length;
+  const errorCount = commandLog.filter(c=>!c.ok).length;
+  const optimalTotal = missions.reduce((s,m)=>s+m.optimalCommands,0);
+  const mistakePenalty = Math.min(20, errorCount);
+  const extra = Math.max(0, totalCommands - optimalTotal - 6);
+  const efficiencyPenalty = Math.min(15, Math.floor(extra/2));
+  const targetMin = 15;
+  const timePenalty = elapsedMin>targetMin ? Math.min(10, Math.floor(elapsedMin-targetMin)) : 0;
+  const timeBonus = (completedList.length===missions.length && elapsedMin < targetMin*0.5) ? 5 : 0;
+  let finalScore = taskPoints - mistakePenalty - efficiencyPenalty - timePenalty + timeBonus;
+  finalScore = Math.max(0, Math.min(100, Math.round(finalScore)));
+
+  renderResults({ taskPoints, mistakePenalty, efficiencyPenalty, timePenalty, timeBonus, finalScore,
+    completedCount:completedList.length, total:missions.length, totalCommands, errorCount, elapsedMs });
+}
+
+function renderResults(d){
+  el.scoreNum.textContent = d.finalScore;
+  const minutes = Math.floor(d.elapsedMs/60000), seconds = Math.floor((d.elapsedMs%60000)/1000);
+  const rows = [
+    ['Tasks completed', `${d.completedCount} / ${d.total}`, ''],
+    ['Task points', `+${d.taskPoints}`, 'pos'],
+    ['Commands run', `${d.totalCommands}`, ''],
+    ['Mistakes made', `${d.errorCount}`, d.mistakePenalty>0?'neg':''],
+    ['Mistake penalty', `-${d.mistakePenalty}`, d.mistakePenalty>0?'neg':''],
+    ['Efficiency penalty', `-${d.efficiencyPenalty}`, d.efficiencyPenalty>0?'neg':''],
+    ['Time taken', `${pad(minutes)}:${pad(seconds)}`, ''],
+    ['Time penalty', `-${d.timePenalty}`, d.timePenalty>0?'neg':''],
+    ['Speed bonus', `+${d.timeBonus}`, d.timeBonus>0?'pos':'']
+  ];
+  el.breakdown.innerHTML = rows.map(r=>`<div class="breakdown-row"><div class="lbl">${r[0]}</div><div class="val ${r[2]}">${r[1]}</div></div>`).join('');
+
+  el.resultsMissions.innerHTML = missions.map(m=>{
+    const icon = m.completed ? '✓' : '✗';
+    const cls = m.completed ? 'pass' : 'fail';
+    return `<div class="rm-row"><div class="rm-icon ${cls}">${icon}</div><div class="rm-text">${m.text.replace(/<div class="obj-quote">.*?<\/div>/,'')}</div></div>`;
+  }).join('');
+
+  el.resultsOverlay.style.display = 'flex';
+}
+
+el.startBtn.addEventListener('click', startExam);
+el.restartBtn.addEventListener('click', startExam);
+
+el.submitBtn.addEventListener('click', ()=>{
+  if(examState!=='in_progress') return;
+  if(!submitArmed){
+    submitArmed = true;
+    el.submitBtn.textContent = 'Confirm Submit?';
+    el.submitBtn.classList.add('armed');
+    setTimeout(()=>{ if(submitArmed && examState==='in_progress'){ submitArmed=false; el.submitBtn.textContent='Submit Exam'; el.submitBtn.classList.remove('armed'); } }, 4000);
+  } else {
+    submitArmed = false;
+    submitExam();
+  }
+});
+
+/* =========================================================
+   BOOT
+========================================================= */
+function boot(){
+  ROOT = freshRoot();
+  cwd = HOME_SEG.slice();
+  renderPrompt();
+  el.startOverlay.style.display = 'flex';
 }
 boot();
 </script>
